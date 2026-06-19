@@ -1299,7 +1299,7 @@ updateValveLiquidByMedium();
 updateValveXtByType();
 updateValveVisibility();
 
-valveCalcBtn.addEventListener("click", handleValveCalc);
+if (valveCalcBtn) valveCalcBtn.addEventListener("click", handleValveCalc);
 [
   valveFluidType,
   valveType,
@@ -1326,18 +1326,1144 @@ valveCalcBtn.addEventListener("click", handleValveCalc);
   valveStdPressure,
   valveStdTemp,
   valveStdZ
-].forEach((el) => {
+].filter(Boolean).forEach((el) => {
   el.addEventListener("input", handleValveCalc);
   el.addEventListener("change", handleValveCalc);
 });
 
-valveFluidType.addEventListener("change", updateValveVisibility);
-valveType.addEventListener("change", () => {
+if (valveFluidType) valveFluidType.addEventListener("change", updateValveVisibility);
+if (valveType) valveType.addEventListener("change", () => {
   updateValveXtByType();
   handleValveCalc();
 });
-valveLiquidMedium.addEventListener("change", () => {
+if (valveLiquidMedium) valveLiquidMedium.addEventListener("change", () => {
   updateValveLiquidByMedium();
   handleValveCalc();
 });
 
+
+
+/* 规格书生成：压力 / 差压变送器 / 科里奥利质量流量计 / 电磁流量计 / 调节阀 V1.6-E */
+const specFieldIds = [
+  "specType",
+  "specProjectNo", "specFileNo", "specProjectName", "specPlantName", "specDesignStage", "specRev",
+  "specTag", "specPid", "specService", "specFunction", "specHazardClass", "specHazardCert",
+  "specFluid", "specFluidState", "specDensity", "specViscosity", "specPMin", "specPNormal", "specPMax",
+  "specTMin", "specTNormal", "specTMax", "specDesignPressure", "specDesignTemp",
+  "specDpFlowRange", "specDpMax", "specStaticPressure", "specHpLpSize", "specHpLpRating", "specHpLpFacing", "specFlushingConnection", "specDpManifold",
+  "specTxType", "specOutput", "specProtocol", "specSupply", "specInstrRange", "specCalibRange", "specDcsRange",
+  "specDamping", "specAccuracy", "specProtection", "specMounting", "specProcessConnType", "specProcessConnSize",
+  "specProcessConnRating", "specProcessConnFacing", "specProcessConnRoughness", "specElectricalConn", "specGrounding",
+  "specWettedMaterial", "specHousing", "specBracketMaterial", "specPaint", "specSeparatorMode", "specSeparatorType",
+  "specRemoteCapillary", "specCapillaryLength", "specCapillaryArmour", "specFillingFluid", "specFlushingRing",
+  "specLocalMeter", "specManifold", "specTracing", "specNe43", "specManufacturer", "specModel", "specSupplier", "specNotes",
+  "specLineNumber", "specLineSize", "specLineRating", "specLineClass", "specLineMaterial",
+  "specFoaming", "specEntrainedSolid", "specCorrosiveAbrasive", "specBuildUp", "specPulsatingFlow", "specVibration",
+  "specFlowMin", "specFlowNormal", "specFlowMax", "specFlowRange", "specMaxPressureDrop", "specMolecularMass", "specSpecificGravity",
+  "specMeterTubeType", "specCalculatedPressureDrop", "specFlowDirection", "specMeterConnType", "specMeterRoughness", "specMeterSize", "specMeterRating", "specMeterFacing", "specLiningCoating", "specMeterTubeMaterial", "specFlangeMaterial", "specMeterTubeModel", "specMeterHazardExecution",
+  "specCoriolisMounting", "specDistanceFromMeter", "specCoriolisPower", "specMaxLoad", "specZeroStability", "specCoriolisAccuracy", "specTxHazardExecution", "specTxHousingMaterial", "specTxModel", "specTransmitterHolder", "specInterconnectionCable", "specTransmitterConfigurator", "specDiagnostic",
+  "specMagLineNumber", "specMagLineSize", "specMagLineRating", "specMagLineClass", "specMagLineMaterial", "specMagFoaming", "specMagEntrainedSolid", "specMagCorrosiveAbrasive", "specMagBuildUp", "specMagPulsatingFlow", "specMagVibration", "specMagFlowMin", "specMagFlowNormal", "specMagFlowMax", "specMagFlowRange", "specMagMaxPressureDrop", "specMagSpecificGravity", "specMagMolecularMass", "specMagTransducerType", "specMagInstrumentRange", "specMagInstrumentAccuracy", "specMagProcessConnection", "specMagFlangeMaterial", "specMagBodyMaterial", "specMagLiningMaterial", "specMagElectrodeType", "specMagElectrodeMaterial", "specMagGroundingRing", "specMagSpecialCableLength", "specMagSpecialCableEntry", "specMagMounting", "specMagMeasuringRange", "specMagMeasuringAccuracy", "specMagCableEntry", "specMagPowerSupply", "specMagPowerCableEntry", "specMagHousingMaterial", "specMagIntegralIndicator", "specMagTotalizerUnit", "specMagMountingBracket", "specMagBracketMaterial",
+  "specCvAllowNoise", "specCvAirSupply", "specCvAirDesign", "specCvLineInlet", "specCvLineOutlet", "specCvLineClass", "specCvPipeMaterial", "specCvDesignPressure", "specCvDesignTemp", "specCvFailurePosition", "specCvDensity", "specCvSpecificGravity", "specCvVaporPressure", "specCvHeatRatio", "specCvMolecularMass", "specCvViscosity", "specCvFlow", "specCvInletPressure", "specCvPressureDrop", "specCvInletTemperature", "specCvShutoffDp", "specCvLeakageClass", "specCvFlowCoefficient", "specCvSoundPressure", "specCvTravel", "specCvValveType", "specCvRatedCvRangeability", "specCvEndConnection", "specCvRoughness", "specCvBodySize", "specCvBodyRatingFacing", "specCvFlowAction", "specCvBonnet", "specCvTrim", "specCvSealing", "specCvMatBodyBonnet", "specCvMatPlugSeat", "specCvMatStemGuides", "specCvPacking", "specCvYokeHousing", "specCvBellows", "specCvActuator", "specCvActuatorAction", "specCvActuatorSizeSpring", "specCvPositioner", "specCvPositionerSignalAction", "specCvPneumaticConnection", "specCvPositionerProtection", "specCvAirSet", "specCvLimitSwitch", "specCvSolenoid", "specCvTracing", "specCvBoosterAirLock", "specCvManufacturer", "specCvModel", "specCvSupplier"
+];
+
+const specBaseDefaults = {
+  specType: "pressure",
+  specProjectNo: "",
+  specFileNo: "",
+  specProjectName: "",
+  specPlantName: "",
+  specDesignStage: "详细设计",
+  specRev: "C00",
+  specTag: "",
+  specPid: "",
+  specService: "",
+  specFunction: "Pressure Transmitter Gauge",
+  specHazardClass: "Zone 2, Gr. IIC, T6",
+  specHazardCert: "EEx-i / ATEX",
+  specFluid: "",
+  specFluidState: "Gas",
+  specDensity: "",
+  specViscosity: "",
+  specPMin: "",
+  specPNormal: "",
+  specPMax: "",
+  specTMin: "",
+  specTNormal: "",
+  specTMax: "",
+  specDesignPressure: "",
+  specDesignTemp: "",
+  specDpFlowRange: "",
+  specDpMax: "",
+  specStaticPressure: "",
+  specHpLpSize: "1/2\" NPT (F)",
+  specHpLpRating: "",
+  specHpLpFacing: "",
+  specFlushingConnection: "",
+  specDpManifold: "3 Valve Manifold",
+  specTxType: "Smart / 2 Wire",
+  specOutput: "4 - 20 mA",
+  specProtocol: "HART",
+  specSupply: "24 VDC",
+  specInstrRange: "",
+  specCalibRange: "",
+  specDcsRange: "",
+  specDamping: "Set",
+  specAccuracy: "± 0.065% Span",
+  specProtection: "IP 65",
+  specMounting: "Bracket For On Equipment Tag / 2” Pipe Mounting",
+  specProcessConnType: "Threaded",
+  specProcessConnSize: "1/2\" NPT (F)",
+  specProcessConnRating: "",
+  specProcessConnFacing: "",
+  specProcessConnRoughness: "",
+  specElectricalConn: "1/2\" NPT(F), 2 Nos. min.",
+  specGrounding: "Internal and External",
+  specWettedMaterial: "SS316L",
+  specHousing: "Die-Cast Aluminium",
+  specBracketMaterial: "SS",
+  specPaint: "Manufacturer Std.",
+  specSeparatorMode: "none",
+  specSeparatorType: "Diaphragm seal type",
+  specRemoteCapillary: "Yes",
+  specCapillaryLength: "",
+  specCapillaryArmour: "Required",
+  specFillingFluid: "Silicon oil",
+  specFlushingRing: "",
+  specLocalMeter: "Required",
+  specManifold: "",
+  specTracing: "",
+  specNe43: "Yes",
+  specManufacturer: "",
+  specModel: "",
+  specSupplier: "",
+  specNotes: "",
+  specLineNumber: "", specLineSize: "", specLineRating: "", specLineClass: "", specLineMaterial: "",
+  specFoaming: "", specEntrainedSolid: "", specCorrosiveAbrasive: "", specBuildUp: "", specPulsatingFlow: "", specVibration: "",
+  specFlowMin: "", specFlowNormal: "", specFlowMax: "", specFlowRange: "", specMaxPressureDrop: "", specMolecularMass: "", specSpecificGravity: "",
+  specMeterTubeType: "Double Tube", specCalculatedPressureDrop: "", specFlowDirection: "Uni-Directional", specMeterConnType: "Flanged", specMeterRoughness: "125 - 250 AARH", specMeterSize: "", specMeterRating: "", specMeterFacing: "RF", specLiningCoating: "", specMeterTubeMaterial: "316LSS", specFlangeMaterial: "F316/F316L", specMeterTubeModel: "", specMeterHazardExecution: "EEx-i",
+  specCoriolisMounting: "分体式安装", specDistanceFromMeter: "", specCoriolisPower: "220 VAC, 50Hz U.P.S", specMaxLoad: "MFR.STD", specZeroStability: "MFR.STD", specCoriolisAccuracy: "± 0.1 %", specTxHazardExecution: "EEx-i (Signal) & EEx-d (Power Supply)", specTxHousingMaterial: "Die Cast Aluminium", specTxModel: "1700R15ABFMZZZPK", specTransmitterHolder: "YES", specInterconnectionCable: "YES / MFR.STD", specTransmitterConfigurator: "Not Required", specDiagnostic: "Required",
+  specMagLineNumber: "", specMagLineSize: "", specMagLineRating: "", specMagLineClass: "", specMagLineMaterial: "", specMagFoaming: "", specMagEntrainedSolid: "", specMagCorrosiveAbrasive: "", specMagBuildUp: "", specMagPulsatingFlow: "", specMagVibration: "", specMagFlowMin: "", specMagFlowNormal: "", specMagFlowMax: "", specMagFlowRange: "", specMagMaxPressureDrop: "", specMagSpecificGravity: "", specMagMolecularMass: "", specMagTransducerType: "Pipe type", specMagInstrumentRange: "", specMagInstrumentAccuracy: "+/-0.3%", specMagProcessConnection: "", specMagFlangeMaterial: "SS 316", specMagBodyMaterial: "SS 316", specMagLiningMaterial: "PTFE", specMagElectrodeType: "", specMagElectrodeMaterial: "SS 316L", specMagGroundingRing: "YES / SS 316L", specMagSpecialCableLength: "", specMagSpecialCableEntry: "", specMagMounting: "Integral", specMagMeasuringRange: "", specMagMeasuringAccuracy: "+/-0.3%", specMagCableEntry: "1/2\" NPT(F), 2 Nos. min.", specMagPowerSupply: "24VDC", specMagPowerCableEntry: "", specMagHousingMaterial: "Die Cast Aluminium", specMagIntegralIndicator: "YES", specMagTotalizerUnit: "", specMagMountingBracket: "", specMagBracketMaterial: "",
+  specCvAllowNoise: "<85 dBA @ 1 m", specCvAirSupply: "0.6 / 0.7 / 0.8 MPag", specCvAirDesign: "0.8 MPag", specCvLineInlet: "", specCvLineOutlet: "", specCvLineClass: "", specCvPipeMaterial: "", specCvDesignPressure: "", specCvDesignTemp: "", specCvFailurePosition: "Close / Close", specCvDensity: "", specCvSpecificGravity: "", specCvVaporPressure: "", specCvHeatRatio: "", specCvMolecularMass: "", specCvViscosity: "", specCvFlow: "", specCvInletPressure: "", specCvPressureDrop: "", specCvInletTemperature: "", specCvShutoffDp: "", specCvLeakageClass: "ANSI IV", specCvFlowCoefficient: "", specCvSoundPressure: "", specCvTravel: "", specCvValveType: "Globe", specCvRatedCvRangeability: "", specCvEndConnection: "Flanged", specCvRoughness: "125 - 250 AARH", specCvBodySize: "", specCvBodyRatingFacing: "", specCvFlowAction: "Open", specCvBonnet: "", specCvTrim: "", specCvSealing: "Metallic", specCvMatBodyBonnet: "", specCvMatPlugSeat: "", specCvMatStemGuides: "", specCvPacking: "", specCvYokeHousing: "", specCvBellows: "", specCvActuator: "", specCvActuatorAction: "", specCvActuatorSizeSpring: "", specCvPositioner: "Smart E/P / SRI986-BIDS6EAANA", specCvPositionerSignalAction: "4~20 mA (HART) / Direct", specCvPneumaticConnection: "SS 316 / 1/4\" NPT(F)", specCvPositionerProtection: "IP 65 / 1/2\" NPT(F), 2 Nos. min.", specCvAirSet: "Yes / SS304 / KZ03-2B-XX", specCvLimitSwitch: "", specCvSolenoid: "", specCvTracing: "", specCvBoosterAirLock: "", specCvManufacturer: "", specCvModel: "", specCvSupplier: ""
+};
+
+function getEl(id) {
+  return document.getElementById(id);
+}
+
+function escapeHtml(text) {
+  return String(text ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function specVal(id, fallback = "-") {
+  const el = getEl(id);
+  if (!el) return fallback;
+  const value = String(el.value || "").trim();
+  return value ? value : fallback;
+}
+
+function setSpecValues(values) {
+  specFieldIds.forEach((id) => {
+    const el = getEl(id);
+    if (!el) return;
+    if (Object.prototype.hasOwnProperty.call(values, id)) el.value = values[id];
+  });
+  updateSpecVisibility();
+  handleSpecGenerate();
+}
+
+function getSpecType() {
+  return specVal("specType", "pressure");
+}
+
+function resetSpecDefaults() {
+  const type = getSpecType();
+  const defaults = { ...specBaseDefaults, specType: type };
+  if (type === "differential") {
+    defaults.specFileNo = "";
+    defaults.specFunction = "Diff. Pressure Transmitter";
+    defaults.specManifold = "3 Valve Manifold";
+    defaults.specProcessConnSize = "1/2\" NPT (F)";
+    defaults.specHpLpSize = "1/2\" NPT (F)";
+  }
+  if (type === "coriolis") {
+    defaults.specFileNo = "";
+    defaults.specFunction = "Coriolis Flow Transmitter";
+    defaults.specOutput = "4~20mA (HART)";
+    defaults.specProtocol = "HART";
+    defaults.specSupply = "220 VAC, 50Hz U.P.S";
+    defaults.specAccuracy = "± 0.1 %";
+    defaults.specProtection = "IP 65";
+    defaults.specProcessConnType = "Flanged";
+    defaults.specProcessConnFacing = "RF";
+    defaults.specProcessConnRoughness = "125 - 250 AARH";
+    defaults.specTracing = "N/A";
+  }
+  if (type === "magnetic") {
+    defaults.specFileNo = "";
+    defaults.specFunction = "Magnetic Flowmeter";
+    defaults.specOutput = "4~20mA (HART)";
+    defaults.specProtocol = "HART";
+    defaults.specSupply = "24VDC";
+    defaults.specAccuracy = "+/-0.3%";
+    defaults.specProtection = "IP 67";
+    defaults.specFluidState = "Liquid";
+  }
+  if (type === "controlValve") {
+    defaults.specFileNo = "";
+    defaults.specFunction = "Control Valve";
+    defaults.specOutput = "4~20 mA (HART)";
+    defaults.specProtocol = "HART";
+    defaults.specSupply = "24VDC";
+    defaults.specAccuracy = "";
+    defaults.specProtection = "IP 65";
+  }
+  setSpecValues(defaults);
+}
+
+function loadSpecSample() {
+  const type = getSpecType();
+  if (type === "controlValve") {
+    setSpecValues({
+      ...specBaseDefaults,
+      "specType": "controlValve",
+      "specProjectNo": "1332102",
+      "specFileNo": "1332102-0000-IA306-7001",
+      "specProjectName": "南京扬子石油化工有限公司",
+      "specPlantName": "建设10万吨/年EVA装置 / YPC 100kta Lupotech A LDPE/EVA Plant",
+      "specDesignStage": "详细设计",
+      "specRev": "C00",
+      "specTag": "FV-12231",
+      "specPid": "1223",
+      "specService": "Propane or propylene from D-1223",
+      "specFunction": "Control Valve",
+      "specHazardClass": "Zone 2, Gr. IIC, T6",
+      "specHazardCert": "EEx-i, EEx-d (Solenoid Valve) / ATEX",
+      "specFluid": "Propane",
+      "specFluidState": "Gas/Vapour",
+      "specCvAllowNoise": "<85 dBA @ 1 m",
+      "specCvAirSupply": "0.6 / 0.7 / 0.8 MPag",
+      "specCvAirDesign": "0.8 MPag",
+      "specCvLineInlet": "1 1/2\"-PR-12009-1DL4 (TB)",
+      "specCvLineOutlet": "-",
+      "specCvLineClass": "1DL4",
+      "specCvPipeMaterial": "LT CARBON STEEL",
+      "specCvDesignPressure": "4 / 4 MPag",
+      "specCvDesignTemp": "-45 / 200 ℃",
+      "specCvDensity": "- / 80.6 / 80.6",
+      "specCvSpecificGravity": "- / - / -",
+      "specCvVaporPressure": "- / - / -",
+      "specCvHeatRatio": "1.90",
+      "specCvMolecularMass": "44",
+      "specCvViscosity": "- / 0.012 / 0.012",
+      "specCvFlow": "- / 60 / 500 kg/h",
+      "specCvInletPressure": "- / 3 / 3 MPag",
+      "specCvPressureDrop": "- / 0.1 / 0.07 MPa",
+      "specCvInletTemperature": "- / 85 / 85 ℃",
+      "specCvShutoffDp": "4.1 MPa",
+      "specCvLeakageClass": "ANSI IV",
+      "specCvFailurePosition": "Power: Close / Air: Close",
+      "specCvFlowCoefficient": "- / 0.3283 / 3.28",
+      "specCvSoundPressure": "- / - / - dBA",
+      "specCvTravel": "- / 31 / 94 %",
+      "specCvValveType": "Globe",
+      "specCvRatedCvRangeability": "4.0 / 4",
+      "specCvEndConnection": "Flanged",
+      "specCvRoughness": "125 - 250 AARH",
+      "specCvBodySize": "1\"",
+      "specCvBodyRatingFacing": "300# / RF",
+      "specCvFlowAction": "To Open",
+      "specCvBonnet": "EXT-1 (-45 to -17 degC)",
+      "specCvTrim": "Single / Character / Equal %",
+      "specCvSealing": "Metallic",
+      "specCvMatBodyBonnet": "A351CF8",
+      "specCvMatPlugSeat": "SUS316 STELLITE / SUS316",
+      "specCvMatStemGuides": "SUS316 / SUS316",
+      "specCvPacking": "Grafoil",
+      "specCvYokeHousing": "Ductile Iron",
+      "specCvBellows": "-",
+      "specCvActuator": "Diaphragm / PSA1R",
+      "specCvActuatorAction": "- / Direct",
+      "specCvActuatorSizeSpring": "- / -",
+      "specCvPositioner": "Smart E/P / SRI986-BIDS6EAANA",
+      "specCvPositionerSignalAction": "4~20 mA (HART) / Direct",
+      "specCvPneumaticConnection": "SS 316 / 1/4\" NPT(F)",
+      "specCvPositionerProtection": "IP 65 / 1/2\" NPT(F), 2 Nos. min.",
+      "specCvAirSet": "Yes / SS304 / KZ03-2B-XX",
+      "specCvLimitSwitch": "-",
+      "specCvSolenoid": "-",
+      "specCvTracing": "Required",
+      "specCvBoosterAirLock": "- / -",
+      "specCvManufacturer": "AZBIL",
+      "specCvModel": "AGVM-ACNP",
+      "specCvSupplier": "-",
+      "specNotes": "(1) Control Valve to be designed for Full Vacuum condition.\n(2) Consider propane case as alternative case.\n(3) Design conditions: Pressure/Temp: -0.1 MPag / -45°C."
+    });
+    return;
+  }
+  if (type === "magnetic") {
+    setSpecValues({
+      ...specBaseDefaults,
+      "specType": "magnetic",
+      "specProjectNo": "1332102",
+      "specFileNo": "1332102-0000-IA306-3009",
+      "specProjectName": "南京扬子石油化工有限公司",
+      "specPlantName": "建设10万吨/年EVA装置 / YPC 100kta Lupotech A LDPE/EVA Plant",
+      "specDesignStage": "详细设计",
+      "specRev": "C00",
+      "specTag": "FT-11011",
+      "specPid": "WS252-0001",
+      "specService": "Water",
+      "specFunction": "Magnetic Flowmeter",
+      "specHazardClass": "Zone 2, Gr. IIC, T6",
+      "specHazardCert": "EEx-i / ATEX",
+      "specFluid": "Water",
+      "specFluidState": "Liquid",
+      "specDensity": "1000",
+      "specViscosity": "-",
+      "specPMin": "-",
+      "specPNormal": "1.05",
+      "specPMax": "-",
+      "specTMin": "-",
+      "specTNormal": "AMB",
+      "specTMax": "-",
+      "specDesignPressure": "-",
+      "specDesignTemp": "-",
+      "specMagLineNumber": "4\"-FRD-115003-4CC2",
+      "specMagLineSize": "4\"",
+      "specMagLineRating": "150#",
+      "specMagLineClass": "4CC2",
+      "specMagLineMaterial": "CARBON STEEL",
+      "specMagFoaming": "-",
+      "specMagEntrainedSolid": "- / -",
+      "specMagCorrosiveAbrasive": "-",
+      "specMagBuildUp": "-",
+      "specMagPulsatingFlow": "-",
+      "specMagVibration": "-",
+      "specMagFlowMin": "0",
+      "specMagFlowNormal": "30",
+      "specMagFlowMax": "-",
+      "specMagFlowRange": "0 to 36 m³/h",
+      "specMagMaxPressureDrop": "0.05 MPa",
+      "specMagSpecificGravity": "-",
+      "specMagMolecularMass": "-",
+      "specMagTransducerType": "Pipe type",
+      "specMagInstrumentRange": "0 - 36 m³/h",
+      "specMagInstrumentAccuracy": "+/-0.3%",
+      "specMagProcessConnection": "4\" ANSI 150LB RF",
+      "specMagFlangeMaterial": "SS 316",
+      "specMagBodyMaterial": "SS 316",
+      "specMagLiningMaterial": "PTFE",
+      "specMagElectrodeType": "-",
+      "specMagElectrodeMaterial": "SS 316L",
+      "specMagGroundingRing": "YES / SS 316L",
+      "specMagSpecialCableLength": "-",
+      "specMagSpecialCableEntry": "-",
+      "specMagMounting": "Integral",
+      "specNe43": "YES",
+      "specMagMeasuringRange": "0 - 36 m³/h",
+      "specMagMeasuringAccuracy": "+/-0.3%",
+      "specOutput": "4~20mA (HART)",
+      "specMaxLoad": "-",
+      "specMagCableEntry": "1/2\" NPT(F), 2 Nos. min.",
+      "specMagPowerSupply": "24VDC",
+      "specMagPowerCableEntry": "-",
+      "specMagHousingMaterial": "Die Cast Aluminium",
+      "specTxHazardExecution": "EEx-i (Signal) & EEx-d (Power Supply)",
+      "specProtection": "IP 67",
+      "specMagIntegralIndicator": "YES",
+      "specMagTotalizerUnit": "-",
+      "specMagMountingBracket": "-",
+      "specMagBracketMaterial": "-",
+      "specManufacturer": "KROHNE",
+      "specModel": "OPTIFLUX4300C EX",
+      "specSupplier": "-",
+      "specNotes": ""
+    });
+    return;
+  }
+  if (type === "coriolis") {
+    setSpecValues({
+      ...specBaseDefaults,
+      "specType": "coriolis",
+      "specProjectNo": "1332102",
+      "specFileNo": "1332102-0000-IA306-3008",
+      "specProjectName": "南京扬子石油化工有限公司",
+      "specPlantName": "建设10万吨/年EVA装置 / YPC 100kta Lupotech A LDPE/EVA Plant",
+      "specDesignStage": "详细设计",
+      "specRev": "C00",
+      "specTag": "FT-00102",
+      "specPid": "0011",
+      "specService": "Vinyl Acetate from Battery Limit",
+      "specFunction": "Coriolis Flow Transmitter",
+      "specLineNumber": "3\"-VAC-00002-7CS4-TD",
+      "specLineSize": "3\"",
+      "specLineRating": "150#",
+      "specLineClass": "7CS4",
+      "specLineMaterial": "SS 316/316L DUAL GRADE",
+      "specHazardClass": "Zone 2, Gr. IIC, T6",
+      "specHazardCert": "EEx-i / ATEX",
+      "specFluid": "Fresh Vinyl Acetate",
+      "specFluidState": "Liquid",
+      "specDensity": "940.8",
+      "specViscosity": "0.47",
+      "specPMin": "-",
+      "specPNormal": "0.28",
+      "specPMax": "-",
+      "specTMin": "-",
+      "specTNormal": "20",
+      "specTMax": "43",
+      "specDesignPressure": "1",
+      "specDesignTemp": "-14 / 90",
+      "specFoaming": "-",
+      "specEntrainedSolid": "YES / -",
+      "specCorrosiveAbrasive": "-",
+      "specBuildUp": "-",
+      "specPulsatingFlow": "-",
+      "specVibration": "-",
+      "specFlowMin": "500",
+      "specFlowNormal": "5000",
+      "specFlowMax": "12000",
+      "specFlowRange": "0 to 14500 Kg/h",
+      "specMaxPressureDrop": "0.025 MPa",
+      "specSpecificGravity": "-",
+      "specMolecularMass": "-",
+      "specMeterTubeType": "Double Tube",
+      "specCalculatedPressureDrop": "4.1 KPa",
+      "specMeterConnType": "Flanged",
+      "specMeterRoughness": "125 - 250 AARH",
+      "specMeterSize": "1 1/2\"",
+      "specMeterRating": "300#",
+      "specMeterFacing": "RF",
+      "specFlowDirection": "Uni-Directional",
+      "specLiningCoating": "-",
+      "specMeterTubeMaterial": "316LSS",
+      "specFlangeMaterial": "F316/F316L",
+      "specMeterTubeModel": "CMFS150M342N2BZMKZZTG",
+      "specMeterHazardExecution": "EEx-i",
+      "specCoriolisMounting": "分体式安装",
+      "specDistanceFromMeter": "-",
+      "specCoriolisPower": "220 VAC, 50Hz U.P.S",
+      "specOutput": "4~20mA (HART)",
+      "specMaxLoad": "MFR.STD",
+      "specInstrRange": "0 to 14500 Kg/h",
+      "specDcsRange": "0 to 14500 Kg/h",
+      "specZeroStability": "MFR.STD",
+      "specCoriolisAccuracy": "± 0.1 %",
+      "specTxHazardExecution": "EEx-i (Signal) & EEx-d (Power Supply)",
+      "specProtection": "IP 65",
+      "specElectricalConn": "1/2\" NPT(F), 2 Nos. min.",
+      "specGrounding": "Internal & External",
+      "specTxHousingMaterial": "Die Cast Aluminium",
+      "specTxModel": "1700R15ABFMZZZPK",
+      "specTransmitterHolder": "YES",
+      "specInterconnectionCable": "YES / MFR.STD",
+      "specTransmitterConfigurator": "Not Required",
+      "specDiagnostic": "Required",
+      "specTracing": "Tracing",
+      "specManufacturer": "EMERSON",
+      "specSupplier": "-",
+      "specNotes": "(1) Tracing is required.\n(2) For selected meter size <=2\" the rating shall be 300#."
+    });
+    return;
+  }
+
+  if (type === "differential") {
+    setSpecValues({
+      ...specBaseDefaults,
+      specType: "differential",
+      specProjectNo: "1332102",
+      specFileNo: "1332102-0000-IA306-5003",
+      specProjectName: "南京扬子石油化工有限公司",
+      specPlantName: "建设10万吨/年EVA装置 / YPC 100kta Lupotech A LDPE/EVA Plant",
+      specDesignStage: "详细设计",
+      specRev: "C00",
+      specTag: "PDT-03110",
+      specPid: "0310",
+      specService: "F-0301 filter pressure difference",
+      specFunction: "Diff. Pressure Transmitter",
+      specHazardClass: "Zone 2, Gr. IIC, T6",
+      specHazardCert: "EEx-i / ATEX",
+      specFluid: "Isododecane",
+      specFluidState: "Liquid",
+      specDensity: "754",
+      specViscosity: "1.61",
+      specPMin: "-",
+      specPNormal: "0.37",
+      specPMax: "-",
+      specTMin: "-",
+      specTNormal: "13",
+      specTMax: "43",
+      specDesignPressure: "0.7",
+      specDesignTemp: "90",
+      specDpFlowRange: "-",
+      specDpMax: "0.05 MPa",
+      specStaticPressure: "0.37 MPag",
+      specTxType: "SMART / 2 Wire",
+      specOutput: "4 - 20 mA",
+      specProtocol: "HART",
+      specSupply: "24 VDC",
+      specInstrRange: "-",
+      specCalibRange: "0 - 0.1 MPa",
+      specDcsRange: "0 - 0.1 MPa",
+      specDamping: "Set",
+      specAccuracy: "± 0.065% Span",
+      specProtection: "IP 65",
+      specMounting: "Bracket For On Equipment Tag / 2” Pipe Mounting",
+      specProcessConnType: "Threaded",
+      specProcessConnSize: "1/2\" NPT (F)",
+      specHpLpSize: "1/2\" NPT (F)",
+      specElectricalConn: "1/2\" NPT(F), 2 Nos. min.",
+      specGrounding: "Internal and External",
+      specWettedMaterial: "SS316L",
+      specHousing: "Die-Cast Aluminium",
+      specBracketMaterial: "SS",
+      specPaint: "Manufacturer Std.",
+      specLocalMeter: "Required",
+      specManifold: "3 Valve Manifold",
+      specDpManifold: "3 Valve Manifold",
+      specNe43: "Yes",
+      specManufacturer: "HONEYWELL",
+      specModel: "STD720-E1HS4AS-1-A-AHC-11C-A-60A0-F1",
+      specNotes: "(1) Diff. Pressure(max) = 0.05 MPa."
+    });
+    return;
+  }
+
+  setSpecValues({
+    ...specBaseDefaults,
+    specType: "pressure",
+    specProjectNo: "1332102",
+    specFileNo: "1332102-0000-IA306-5004",
+    specProjectName: "南京扬子石油化工有限公司",
+    specPlantName: "建设10万吨/年EVA装置 / YPC 100kta Lupotech A LDPE/EVA Plant",
+    specDesignStage: "详细设计",
+    specRev: "C00",
+    specTag: "PT-00206A",
+    specPid: "0020A",
+    specService: "N2 import from battery limit 1-1/2\"-LN-00002-4CC2",
+    specFunction: "Pressure Transmitter Gauge",
+    specHazardClass: "Zone 2, Gr. IIC, T6",
+    specHazardCert: "EEx-i / ATEX",
+    specFluid: "Nitrogen",
+    specFluidState: "Gas",
+    specPMin: "0.2",
+    specPNormal: "0.25",
+    specPMax: "0.3",
+    specTMin: "-14",
+    specTNormal: "30",
+    specTMax: "43",
+    specDesignPressure: "0.45",
+    specDesignTemp: "-14 / 90",
+    specInstrRange: "0 to 0.5 MPag",
+    specCalibRange: "0 to 0.5 MPag",
+    specDcsRange: "0 to 0.5 MPag",
+    specProcessConnType: "Threaded",
+    specProcessConnSize: "1/2\" NPT (F)",
+    specManufacturer: "EMERSON",
+    specModel: "3051TG2A2B21AHR5M5D4B4K8Q4Q8P1",
+    specNotes: "."
+  });
+}
+
+function updateSpecVisibility() {
+  const separatorMode = specVal("specSeparatorMode", "none");
+  const separatorBox = getEl("specSeparatorBox");
+  if (separatorBox) separatorBox.classList.toggle("hidden", separatorMode === "none");
+
+  const type = getSpecType();
+  const isDp = type === "differential";
+  const isCoriolis = type === "coriolis";
+  const isMagnetic = type === "magnetic";
+  const isControlValve = type === "controlValve";
+  const dpBox = getEl("specDpBox");
+  if (dpBox) dpBox.classList.toggle("hidden", !isDp);
+  const coriolisBox = getEl("specCoriolisBox");
+  if (coriolisBox) coriolisBox.classList.toggle("hidden", !isCoriolis);
+  const magneticBox = getEl("specMagneticBox");
+  if (magneticBox) magneticBox.classList.toggle("hidden", !isMagnetic);
+  const controlValveBox = getEl("specControlValveBox");
+  if (controlValveBox) controlValveBox.classList.toggle("hidden", !isControlValve);
+
+  // 调节阀规格书有独立的阀体、执行机构和附件参数，隐藏压力/差压变送器专用输入区，避免页面混乱。
+  ["specTransmitterParamsBox", "specTransmitterConnectionBox", "specTransmitterMaterialBox"].forEach((id) => {
+    const box = getEl(id);
+    if (box) box.classList.toggle("hidden", isControlValve);
+  });
+
+  const specFunction = getEl("specFunction");
+  if (specFunction) {
+    if (isDp && !specFunction.value.includes("Diff")) specFunction.value = "Diff. Pressure Transmitter";
+    if (isCoriolis && !specFunction.value.includes("Coriolis")) specFunction.value = "Coriolis Flow Transmitter";
+    if (isMagnetic && !specFunction.value.includes("Magnetic")) specFunction.value = "Magnetic Flowmeter";
+    if (isControlValve && !specFunction.value.includes("Control")) specFunction.value = "Control Valve";
+    if (!isDp && !isCoriolis && !isMagnetic && !isControlValve && (specFunction.value.includes("Diff") || specFunction.value.includes("Coriolis") || specFunction.value.includes("Magnetic") || specFunction.value.includes("Control"))) specFunction.value = "Pressure Transmitter Gauge";
+  }
+}
+
+function specCell(value) {
+  return escapeHtml(value || "-");
+}
+
+function renderSpecRows(section, rows, startNo) {
+  return rows.map((row, idx) => `
+    <tr>
+      ${idx === 0 ? `<th class="section-head" rowspan="${rows.length}">${escapeHtml(section)}</th>` : ""}
+      <td class="row-no">${startNo + idx}</td>
+      <td class="field-name">${escapeHtml(row[0])}</td>
+      <td class="value-cell">${specCell(row[1])}</td>
+    </tr>`).join("");
+}
+
+function getSeparatorRows() {
+  const separatorMode = specVal("specSeparatorMode", "none");
+  const separatorText = separatorMode === "none" ? "-" : (separatorMode === "direct" ? "Diaphragm seal type" : "Remote Diaphragm with Capillary");
+  return [
+    ["Type", separatorText],
+    ["Remote Diaphragm with Capillary", separatorMode === "capillary" ? specVal("specRemoteCapillary") : "-"],
+    ["Capillary: Length / Armour", separatorMode === "capillary" ? `${specVal("specCapillaryLength")} / ${specVal("specCapillaryArmour")}` : "-"],
+    ["Filling Fluid", separatorMode === "none" ? "-" : specVal("specFillingFluid")],
+    ["Flushing Ring", separatorMode === "none" ? "-" : specVal("specFlushingRing")]
+  ];
+}
+
+
+
+function handleControlValveSpecGenerate(previewWrap, preview) {
+  const cnTitle = "调节阀规格书";
+  const enTitle = "CONTROL VALVE SPECIFICATION";
+  let rowNo = 1;
+  const groups = [];
+  const addGroup = (section, rows) => {
+    groups.push(renderSpecRows(section, rows, rowNo));
+    rowNo += rows.length;
+  };
+
+  addGroup("GENERAL", [
+    ["Tag Number", specVal("specTag")],
+    ["P&ID No.", specVal("specPid")],
+    ["Service", specVal("specService")],
+    ["Allowable Sound Pressure Level", specVal("specCvAllowNoise")],
+    ["Air Supply Pressure Min / Norm / Max / Design", `${specVal("specCvAirSupply")} / ${specVal("specCvAirDesign")}`]
+  ]);
+  addGroup("PIPE LINE", [["Line Size and Schedule: Inlet", specVal("specCvLineInlet")], ["Line Size and Schedule: Outlet", specVal("specCvLineOutlet")], ["Line Class", specVal("specCvLineClass")], ["Pipe Material", specVal("specCvPipeMaterial")]]);
+  addGroup("DESIGN", [["Pressure Min / Max", specVal("specCvDesignPressure")], ["Temperature Min / Max", specVal("specCvDesignTemp")]]);
+  addGroup("HAZARDOUS AREA", [["Classification", specVal("specHazardClass")], ["Execution / Certification", specVal("specHazardCert")]]);
+  addGroup("PROCESS CONDITIONS", [
+    ["Fluid", specVal("specFluid")], ["Fluid State", specVal("specFluidState")], ["Inlet Density Min / Norm / Max", specVal("specCvDensity")], ["Specific Gravity Min / Norm / Max", specVal("specCvSpecificGravity")], ["Inlet Vapour Pressure", specVal("specCvVaporPressure")], ["Specific Heat Ratio / Molecular Mass", `${specVal("specCvHeatRatio")} / ${specVal("specCvMolecularMass")}`], ["Inlet Viscosity", specVal("specCvViscosity")], ["Flow Rate", specVal("specCvFlow")], ["Inlet Pressure", specVal("specCvInletPressure")], ["Pressure Drop", specVal("specCvPressureDrop")], ["Inlet Temperature", specVal("specCvInletTemperature")], ["Max Shut-off Differential Pressure", specVal("specCvShutoffDp")], ["Leakage Class", specVal("specCvLeakageClass")], ["Power / Air Failure Position", specVal("specCvFailurePosition")]
+  ]);
+  addGroup("CALCULATION DATA", [["Flow Coefficient Cv", specVal("specCvFlowCoefficient")], ["Sound Pressure Level", specVal("specCvSoundPressure")], ["Travel %", specVal("specCvTravel")]]);
+  addGroup("SELECTED VALVE", [["Type", specVal("specCvValveType")], ["Cv / Rangeability", specVal("specCvRatedCvRangeability")]]);
+  addGroup("BODY", [["End Connection Type", specVal("specCvEndConnection")], ["Roughness", specVal("specCvRoughness")], ["Size", specVal("specCvBodySize")], ["Rating / Facing", specVal("specCvBodyRatingFacing")], ["Flow Action To", specVal("specCvFlowAction")], ["Bonnet Type / Lubricat.", specVal("specCvBonnet")]]);
+  addGroup("TRIM", [["Port / Plug / Character", specVal("specCvTrim")], ["Sealing Seat / Plug", specVal("specCvSealing")]]);
+  addGroup("ACTUATOR", [["Type / Model", specVal("specCvActuator")], ["Action / Handwheel Location", specVal("specCvActuatorAction")], ["Size / Spring Range", specVal("specCvActuatorSizeSpring")]]);
+  addGroup("MATERIAL", [["Body / Bonnet", specVal("specCvMatBodyBonnet")], ["Plug / Seat", specVal("specCvMatPlugSeat")], ["Stem / Plug Guides", specVal("specCvMatStemGuides")], ["Yoke / Housing", specVal("specCvYokeHousing")], ["Packing", specVal("specCvPacking")], ["Bellows", specVal("specCvBellows")]]);
+  addGroup("POSITIONER", [["Type / Model", specVal("specCvPositioner")], ["Input Signal Range / Action", specVal("specCvPositionerSignalAction")], ["Pneumatic Connection", specVal("specCvPneumaticConnection")], ["Protection / Electrical Connection", specVal("specCvPositionerProtection")], ["Grounding Connection", "Required"]]);
+  addGroup("AIR SET", [["Filter Regulator & Gauge / Material / Model", specVal("specCvAirSet")]]);
+  addGroup("LIMIT SWITCH", [["Tag Number / Quantity / Model", specVal("specCvLimitSwitch")]]);
+  addGroup("SOLENOID VALVE", [["Tag Number / Quantity / Model", specVal("specCvSolenoid")]]);
+  addGroup("OPTIONS", [["Tracing / Jacketing", specVal("specCvTracing")], ["Booster / Air Lock", specVal("specCvBoosterAirLock")]]);
+  addGroup("PURCHASE", [["MR No. / PO No.", "- / -"], ["Manufacturer", specVal("specCvManufacturer")], ["Model", specVal("specCvModel")], ["Supplier", specVal("specCvSupplier")]]);
+
+  preview.innerHTML = `
+    <div class="spec-title-box"><h3>${escapeHtml(cnTitle)}</h3><p>${escapeHtml(enTitle)}</p><p>专业 / DISCIPLINE：仪表 / INSTRUMENT</p></div>
+    <table class="spec-meta-table"><tr><th>项目号<br>PROJECT NO.</th><td>${specCell(specVal("specProjectNo"))}</td><th>图号<br>FILE NO.</th><td>${specCell(specVal("specFileNo"))}</td><th>版次<br>REV.</th><td>${specCell(specVal("specRev"))}</td></tr><tr><th>项目名称<br>PROJECT</th><td colspan="2">${specCell(specVal("specProjectName"))}</td><th>装置<br>PLANT / UNIT</th><td colspan="2">${specCell(specVal("specPlantName"))}</td></tr><tr><th>设计阶段<br>DESIGN STAGE</th><td colspan="5">${specCell(specVal("specDesignStage"))}</td></tr></table>
+    <table class="spec-table control-valve-spec-table"><colgroup><col style="width:27mm" /><col style="width:7mm" /><col style="width:46mm" /><col /></colgroup>${groups.join("")}</table>
+    <div class="spec-notes-box"><strong>Notes:</strong><br>${escapeHtml(specVal("specNotes", ""))}</div>
+    <div class="spec-footer-box"><div>仪表规格书<br>INSTRUMENT SPECIFICATION</div><div>调节阀<br>Valve Control</div><div>V1.6-E-fix 生成预览，正式归档前需校审</div></div>
+    <div class="spec-muted">本预览按上传调节阀模板主要栏目生成，版式为网页打印优化版。</div>`;
+  previewWrap.classList.remove("hidden");
+}
+
+function handleMagneticSpecGenerate(previewWrap, preview) {
+  const cnTitle = "电磁流量计规格书";
+  const enTitle = "MAGNETIC FLOWMETER SPECIFICATION";
+  const pressureRange = `${specVal("specPMin")} / ${specVal("specPNormal")} / ${specVal("specPMax")} MPag`;
+  const tempRange = `${specVal("specTMin")} / ${specVal("specTNormal")} / ${specVal("specTMax")} ℃`;
+  let rowNo = 1;
+  const groups = [];
+  const addGroup = (section, rows) => {
+    groups.push(renderSpecRows(section, rows, rowNo));
+    rowNo += rows.length;
+  };
+
+  addGroup("GENERAL", [
+    ["Tag Number", specVal("specTag")],
+    ["P&ID No.", specVal("specPid")],
+    ["Service", specVal("specService")],
+    ["Line Number", specVal("specMagLineNumber")],
+    ["Line Size / Rating", `${specVal("specMagLineSize")} / ${specVal("specMagLineRating")}`],
+    ["Line Class / Material", `${specVal("specMagLineClass")} / ${specVal("specMagLineMaterial")}`]
+  ]);
+
+  addGroup("DESIGN", [
+    ["Pressure Min / Max", `${specVal("specDesignPressure")} MPag`],
+    ["Temperature Min / Max", `${specVal("specDesignTemp")} ℃`]
+  ]);
+
+  addGroup("PROCESS CONDITIONS", [
+    ["Fluid", specVal("specFluid")],
+    ["Fluid State", specVal("specFluidState")],
+    ["Foaming", specVal("specMagFoaming")],
+    ["Dynamic Viscosity", `${specVal("specViscosity")} mPa.s`],
+    ["Operating Density", `${specVal("specDensity")} kg/m³`],
+    ["Specific Gravity / Molecular Mass", `${specVal("specMagSpecificGravity")} / ${specVal("specMagMolecularMass")}`],
+    ["Entrained Liquid / Solid", specVal("specMagEntrainedSolid")],
+    ["Corrosive / Abrasive", specVal("specMagCorrosiveAbrasive")],
+    ["Build-Up Tendency", specVal("specMagBuildUp")],
+    ["Pulsating Flow", specVal("specMagPulsatingFlow")],
+    ["Vibration at Sensor Location", specVal("specMagVibration")],
+    ["Flow Rate Min / Normal / Max", `${specVal("specMagFlowMin")} / ${specVal("specMagFlowNormal")} / ${specVal("specMagFlowMax")} m³/h`],
+    ["Flow Rate Range", specVal("specMagFlowRange")],
+    ["Pressure Min / Normal / Max", pressureRange],
+    ["Max Allowable Pressure Drop", specVal("specMagMaxPressureDrop")],
+    ["Temperature Min / Normal / Max", tempRange]
+  ]);
+
+  addGroup("TRANSDUCER", [
+    ["Tag Number", specVal("specTag")],
+    ["Type", specVal("specMagTransducerType")],
+    ["Instrument Range / Accuracy", `${specVal("specMagInstrumentRange")} / ${specVal("specMagInstrumentAccuracy")}`],
+    ["Process Connection Size/Rating/Facing", specVal("specMagProcessConnection")],
+    ["Flange Material", specVal("specMagFlangeMaterial")],
+    ["Body Material", specVal("specMagBodyMaterial")],
+    ["Lining Material", specVal("specMagLiningMaterial")],
+    ["Electrode Type", specVal("specMagElectrodeType")],
+    ["Electrode Material", specVal("specMagElectrodeMaterial")],
+    ["Grounding Ring / Material", specVal("specMagGroundingRing")],
+    ["Special Cable Length", specVal("specMagSpecialCableLength")],
+    ["Special Cable Entry", specVal("specMagSpecialCableEntry")],
+    ["HAZARDOUS AREA", `${specVal("specHazardClass")} / ${specVal("specHazardCert")}`],
+    ["Mechanical Protection", specVal("specProtection")]
+  ]);
+
+  addGroup("TRANSMITTER", [
+    ["Tag Number", specVal("specTag")],
+    ["Mounting", specVal("specMagMounting")],
+    ["Namur NE43 Compliant", specVal("specNe43")],
+    ["Measuring Range / Accuracy", `${specVal("specMagMeasuringRange")} / ${specVal("specMagMeasuringAccuracy")}`],
+    ["Output Signal / Max. Load", `${specVal("specOutput")} / ${specVal("specMaxLoad")}`],
+    ["Special Cable Entry", specVal("specMagSpecialCableEntry")],
+    ["Cable Entry", specVal("specMagCableEntry")],
+    ["Power Supply", specVal("specMagPowerSupply")],
+    ["Power Cable Entry", specVal("specMagPowerCableEntry")],
+    ["Housing Material", specVal("specMagHousingMaterial")],
+    ["HAZARDOUS AREA", `${specVal("specHazardClass")} / ${specVal("specTxHazardExecution")} / ${specVal("specHazardCert")}`],
+    ["Mechanical Protection", specVal("specProtection")]
+  ]);
+
+  addGroup("OPTIONS", [
+    ["Integral Indicator", specVal("specMagIntegralIndicator")],
+    ["Totalizer Unit", specVal("specMagTotalizerUnit")],
+    ["Mounting Bracket", specVal("specMagMountingBracket")],
+    ["Bracket Material", specVal("specMagBracketMaterial")]
+  ]);
+
+  addGroup("PURCHASE", [
+    ["MR No. / PO No.", "- / -"],
+    ["Manufacturer", specVal("specManufacturer")],
+    ["Model", specVal("specModel")]
+  ]);
+
+  preview.innerHTML = `
+    <div class="spec-title-box">
+      <h3>${escapeHtml(cnTitle)}</h3>
+      <p>${escapeHtml(enTitle)}</p>
+      <p>专业 / DISCIPLINE：仪表 / INSTRUMENT</p>
+    </div>
+    <table class="spec-meta-table">
+      <tr>
+        <th>项目号<br>PROJECT NO.</th><td>${specCell(specVal("specProjectNo"))}</td>
+        <th>图号<br>FILE NO.</th><td>${specCell(specVal("specFileNo"))}</td>
+        <th>版次<br>REV.</th><td>${specCell(specVal("specRev"))}</td>
+      </tr>
+      <tr>
+        <th>项目名称<br>PROJECT</th><td colspan="2">${specCell(specVal("specProjectName"))}</td>
+        <th>装置<br>PLANT / UNIT</th><td colspan="2">${specCell(specVal("specPlantName"))}</td>
+      </tr>
+      <tr>
+        <th>设计阶段<br>DESIGN STAGE</th><td colspan="5">${specCell(specVal("specDesignStage"))}</td>
+      </tr>
+    </table>
+    <table class="spec-table magnetic-spec-table">
+      <colgroup><col style="width:27mm" /><col style="width:7mm" /><col style="width:48mm" /><col /></colgroup>
+      ${groups.join("")}
+    </table>
+    <div class="spec-notes-box"><strong>Notes:</strong><br>${escapeHtml(specVal("specNotes", ""))}</div>
+    <div class="spec-footer-box">
+      <div>仪表规格书<br>INSTRUMENT SPECIFICATION</div>
+      <div>电磁流量计<br>Magnetic Flowmeter</div>
+      <div>V1.6-E-fix 生成预览，正式归档前需校审</div>
+    </div>
+    <div class="spec-muted">本预览按上传电磁流量计模板主要栏目生成，版式为网页打印优化版。</div>
+  `;
+  previewWrap.classList.remove("hidden");
+}
+
+function handleCoriolisSpecGenerate(previewWrap, preview) {
+  const cnTitle = "科里奥利质量流量计规格书";
+  const enTitle = "CORIOLIS FLOW TRANSMITTER SPECIFICATION";
+  const pressureRange = `${specVal("specPMin")} / ${specVal("specPNormal")} / ${specVal("specPMax")} MPag`;
+  const tempRange = `${specVal("specTMin")} / ${specVal("specTNormal")} / ${specVal("specTMax")} ℃`;
+  let rowNo = 1;
+  const groups = [];
+  const addGroup = (section, rows) => {
+    groups.push(renderSpecRows(section, rows, rowNo));
+    rowNo += rows.length;
+  };
+
+  addGroup("GENERAL", [
+    ["Tag Number", specVal("specTag")],
+    ["P&ID No.", specVal("specPid")],
+    ["Service", specVal("specService")],
+    ["Line Number", specVal("specLineNumber")],
+    ["Line Size / Rating", `${specVal("specLineSize")} / ${specVal("specLineRating")}`],
+    ["Line Class / Material", `${specVal("specLineClass")} / ${specVal("specLineMaterial")}`]
+  ]);
+
+  addGroup("DESIGN", [
+    ["Pressure Min / Max", `${specVal("specDesignPressure")} MPag`],
+    ["Temperature Min / Max", `${specVal("specDesignTemp")} ℃`]
+  ]);
+
+  addGroup("PROCESS CONDITIONS", [
+    ["Fluid", specVal("specFluid")],
+    ["Fluid State", specVal("specFluidState")],
+    ["Foaming", specVal("specFoaming")],
+    ["Dynamic Viscosity", `${specVal("specViscosity")} mPa.s`],
+    ["Operating Density", `${specVal("specDensity")} kg/m³`],
+    ["Specific Gravity / Molecular Mass", `${specVal("specSpecificGravity")} / ${specVal("specMolecularMass")}`],
+    ["Entrained Liquid / Solid", specVal("specEntrainedSolid")],
+    ["Corrosive / Abrasive", specVal("specCorrosiveAbrasive")],
+    ["Build-Up Tendency", specVal("specBuildUp")],
+    ["Pulsating Flow", specVal("specPulsatingFlow")],
+    ["Vibration at Sensor Location", specVal("specVibration")],
+    ["Flow Rate Min / Normal / Max", `${specVal("specFlowMin")} / ${specVal("specFlowNormal")} / ${specVal("specFlowMax")} Kg/h`],
+    ["Flow Rate Range", specVal("specFlowRange")],
+    ["Pressure Min / Normal / Max", pressureRange],
+    ["Max Allowable Pressure Drop", specVal("specMaxPressureDrop")],
+    ["Temperature Min / Normal / Max", tempRange]
+  ]);
+
+  addGroup("METER TUBE", [
+    ["Tag Number", specVal("specTag")],
+    ["Type", specVal("specMeterTubeType")],
+    ["Calculated Press. Drop", specVal("specCalculatedPressureDrop")],
+    ["Connection Type / Roughness", `${specVal("specMeterConnType")} / ${specVal("specMeterRoughness")}`],
+    ["Size / Rating / Facing", `${specVal("specMeterSize")} / ${specVal("specMeterRating")} / ${specVal("specMeterFacing")}`],
+    ["Flow Direction", specVal("specFlowDirection")],
+    ["Lining / Coating", specVal("specLiningCoating")],
+    ["Material: Meter Tube", specVal("specMeterTubeMaterial")],
+    ["Material: Flanges", specVal("specFlangeMaterial")],
+    ["HAZARDOUS AREA", `${specVal("specHazardClass")} / ${specVal("specMeterHazardExecution")} / ${specVal("specHazardCert")}`],
+    ["Mechanical Protection", specVal("specProtection")],
+    ["Electrical Connection", "-"],
+    ["Grounding Connection", "-"],
+    ["Model", specVal("specMeterTubeModel")]
+  ]);
+
+  addGroup("TRANSMITTER", [
+    ["Tag Number", specVal("specTag")],
+    ["Mounting", specVal("specCoriolisMounting")],
+    ["Namur NE43 Compliant", specVal("specNe43")],
+    ["Distance from Meter Tube", specVal("specDistanceFromMeter")],
+    ["Power Supply", specVal("specCoriolisPower")],
+    ["Output Signal", specVal("specOutput")],
+    ["Max Load", specVal("specMaxLoad")],
+    ["Instrument Range", specVal("specInstrRange")],
+    ["DCS Range", specVal("specDcsRange")],
+    ["Zero Stability", specVal("specZeroStability")],
+    ["Accuracy", specVal("specCoriolisAccuracy")],
+    ["HAZARDOUS AREA", `${specVal("specHazardClass")} / ${specVal("specTxHazardExecution")} / ${specVal("specHazardCert")}`],
+    ["Mechanical Protection", specVal("specProtection")],
+    ["Electrical Connection", specVal("specElectricalConn")],
+    ["Grounding Connection", specVal("specGrounding")],
+    ["Housing Material", specVal("specTxHousingMaterial")],
+    ["Model", specVal("specTxModel")]
+  ]);
+
+  addGroup("OPTIONS", [
+    ["Transmitter Holder", specVal("specTransmitterHolder")],
+    ["Interconnection Cable / Length", specVal("specInterconnectionCable")],
+    ["Transmitter Configurator", specVal("specTransmitterConfigurator")],
+    ["Diagnostic", specVal("specDiagnostic")],
+    ["Tracing / Jacketing", specVal("specTracing")]
+  ]);
+
+  addGroup("PURCHASE", [
+    ["MR No. / PO No.", "- / -"],
+    ["Manufacturer", specVal("specManufacturer")],
+    ["Supplier", specVal("specSupplier")]
+  ]);
+
+  preview.innerHTML = `
+    <div class="spec-title-box">
+      <h3>${escapeHtml(cnTitle)}</h3>
+      <p>${escapeHtml(enTitle)}</p>
+      <p>专业 / DISCIPLINE：仪表 / INSTRUMENT</p>
+    </div>
+    <table class="spec-meta-table">
+      <tr>
+        <th>项目号<br>PROJECT NO.</th><td>${specCell(specVal("specProjectNo"))}</td>
+        <th>图号<br>FILE NO.</th><td>${specCell(specVal("specFileNo"))}</td>
+        <th>版次<br>REV.</th><td>${specCell(specVal("specRev"))}</td>
+      </tr>
+      <tr>
+        <th>项目名称<br>PROJECT</th><td colspan="2">${specCell(specVal("specProjectName"))}</td>
+        <th>装置<br>PLANT / UNIT</th><td colspan="2">${specCell(specVal("specPlantName"))}</td>
+      </tr>
+      <tr>
+        <th>设计阶段<br>DESIGN STAGE</th><td colspan="5">${specCell(specVal("specDesignStage"))}</td>
+      </tr>
+    </table>
+    <table class="spec-table coriolis-spec-table">
+      <colgroup><col style="width:27mm" /><col style="width:7mm" /><col style="width:46mm" /><col /></colgroup>
+      ${groups.join("")}
+    </table>
+    <div class="spec-notes-box"><strong>Notes:</strong><br>${escapeHtml(specVal("specNotes", ""))}</div>
+    <div class="spec-footer-box">
+      <div>仪表规格书<br>INSTRUMENT SPECIFICATION</div>
+      <div>科里奥利质量流量计<br>Coriolis Flow Transmitter</div>
+      <div>V1.6-E-fix 生成预览，正式归档前需校审</div>
+    </div>
+    <div class="spec-muted">本预览按上传科里奥利质量流量计模板主要栏目生成，版式为网页打印优化版。</div>
+  `;
+  previewWrap.classList.remove("hidden");
+}
+
+function handleSpecGenerate() {
+  const previewWrap = getEl("specPreviewWrap");
+  const preview = getEl("specPreview");
+  if (!previewWrap || !preview) return;
+
+  updateSpecVisibility();
+  const type = getSpecType();
+  if (type === "controlValve") {
+    handleControlValveSpecGenerate(previewWrap, preview);
+    return;
+  }
+  if (type === "magnetic") {
+    handleMagneticSpecGenerate(previewWrap, preview);
+    return;
+  }
+  if (type === "coriolis") {
+    handleCoriolisSpecGenerate(previewWrap, preview);
+    return;
+  }
+  const isDp = type === "differential";
+  const cnTitle = isDp ? "差压变送器规格书" : "压力变送器规格书";
+  const enTitle = isDp ? "DIFF. PRESSURE TRANSMITTER SPECIFICATION" : "PRESSURE TRANSMITTER SPECIFICATION";
+  const footerName = isDp ? "差压变送器<br>Diff. Pressure Transmitter" : "压力变送器<br>Pressure Transmitter";
+  const pressureRange = `${specVal("specPMin")} / ${specVal("specPNormal")} / ${specVal("specPMax")} MPag`;
+  const tempRange = `${specVal("specTMin")} / ${specVal("specTNormal")} / ${specVal("specTMax")} ℃`;
+
+  let rowNo = 1;
+  const groups = [];
+  const addGroup = (section, rows) => {
+    groups.push(renderSpecRows(section, rows, rowNo));
+    rowNo += rows.length;
+  };
+
+  addGroup("GENERAL", [
+    ["Tag Number", specVal("specTag")],
+    ["P&ID No.", specVal("specPid")],
+    ["Service", specVal("specService")]
+  ]);
+
+  if (!isDp) {
+    addGroup("FUNCTION", [["Function", specVal("specFunction")]]);
+  }
+
+  addGroup("HAZARDOUS AREA", [
+    ["Classification", specVal("specHazardClass")],
+    ["Execution / Certification", specVal("specHazardCert")]
+  ]);
+
+  addGroup("DESIGN", [
+    ["Pressure Min / Normal / Max", pressureRange],
+    ["Temperature Min / Normal / Max", tempRange],
+    ["Design Pressure", `${specVal("specDesignPressure")} MPag`],
+    ["Design Temperature Min / Max", `${specVal("specDesignTemp")} ℃`]
+  ]);
+
+  addGroup("MOUNTING", [["Mounting", specVal("specMounting")]]);
+
+  const processRows = [
+    ["Fluid", specVal("specFluid")],
+    ["Fluid State", specVal("specFluidState")],
+    ["Oper. Density", `${specVal("specDensity")} kg/m³`],
+    ["Operating Viscosity", `${specVal("specViscosity")} mPa·s`],
+    ["Pressure Min / Normal / Max", pressureRange],
+    ["Temperature Min / Normal / Max", tempRange]
+  ];
+  if (isDp) {
+    processRows.push(["Flow Rate Range", specVal("specDpFlowRange")]);
+    processRows.push(["Diff. Pressure(max)", specVal("specDpMax")]);
+    processRows.push(["Static Pressure", specVal("specStaticPressure")]);
+  }
+  addGroup("PROCESS CONDITIONS", processRows);
+
+  addGroup("SENSING ELEMENT", [
+    ["Type", isDp ? "(*)" : "Capacitance"],
+    ["Sensor", "Diaphragm"]
+  ]);
+
+  addGroup("SEPARATOR", getSeparatorRows());
+
+  addGroup("TRANSMITTER", [
+    ["Type / System", specVal("specTxType")],
+    ["Output Signal", specVal("specOutput")],
+    ["Output Digital Format", specVal("specProtocol")],
+    ["Supply", specVal("specSupply")],
+    ["Instr. Range", specVal("specInstrRange")],
+    ["Calib. Range", specVal("specCalibRange")],
+    ["DCS Range", specVal("specDcsRange")],
+    ["Damp. Time", specVal("specDamping")],
+    ["Accuracy", specVal("specAccuracy")],
+    ["Mechanical Protection", specVal("specProtection")]
+  ]);
+
+  if (isDp) {
+    addGroup("PROCESS CONNECTIONS", [
+      ["Type", specVal("specProcessConnType")],
+      ["Size: HP/LP Side", specVal("specHpLpSize")],
+      ["Rating: HP/LP Side", specVal("specHpLpRating")],
+      ["Facing: HP/LP Side", specVal("specHpLpFacing")],
+      ["Flushing Connection", specVal("specFlushingConnection")],
+      ["Roughness: HP/LP Side", specVal("specProcessConnRoughness")]
+    ]);
+  } else {
+    addGroup("PROCESS CONNECTIONS", [
+      ["Type", specVal("specProcessConnType")],
+      ["Size", specVal("specProcessConnSize")],
+      ["Rating", specVal("specProcessConnRating")],
+      ["Facing", specVal("specProcessConnFacing")],
+      ["Roughness", specVal("specProcessConnRoughness")]
+    ]);
+  }
+
+  addGroup("ELECTRICAL CONNECTIONS", [
+    ["Electrical Connection", specVal("specElectricalConn")],
+    ["Grounding Connection", specVal("specGrounding")]
+  ]);
+
+  addGroup("DIGITAL FUNCTION", [
+    ["Communication", "Digital"],
+    ["Protocol", `${specVal("specProtocol")} FSK`],
+    ["Configur. & Calibrat.", "Yes (Handheld Device)"],
+    ["Diagnostic with Alarm", "Required"],
+    ["Namur NE43 Compliant", specVal("specNe43")]
+  ]);
+
+  if (isDp) {
+    addGroup("MATERIAL", [
+      ["Sensing Element", specVal("specWettedMaterial")],
+      ["Body & Oval Flanges", specVal("specWettedMaterial")],
+      ["Other Wetted Parts", specVal("specWettedMaterial")],
+      ["Electronic Housing", specVal("specHousing")],
+      ["Bracket & U Bolts", specVal("specBracketMaterial")],
+      ["Paint", specVal("specPaint")]
+    ]);
+  } else {
+    addGroup("MATERIAL", [
+      ["Sensing Element", specVal("specWettedMaterial")],
+      ["Body / Other Wetted Parts", specVal("specWettedMaterial")],
+      ["Diaphragm", specVal("specWettedMaterial")],
+      ["Electronic Housing", specVal("specHousing")],
+      ["Bracket & U Bolts", specVal("specBracketMaterial")],
+      ["Paint", specVal("specPaint")]
+    ]);
+  }
+
+  addGroup("OPTIONS", [
+    ["Integrated Output Meter", specVal("specLocalMeter")],
+    ["Manifold", isDp ? specVal("specDpManifold") : specVal("specManifold")],
+    ["Tracing / Jacketing", specVal("specTracing")]
+  ]);
+
+  addGroup("PURCHASE", [
+    ["Manufacturer", specVal("specManufacturer")],
+    ["Model", specVal("specModel")],
+    ["Supplier", specVal("specSupplier")]
+  ]);
+
+  preview.innerHTML = `
+    <div class="spec-title-box">
+      <h3>${escapeHtml(cnTitle)}</h3>
+      <p>${escapeHtml(enTitle)}</p>
+      <p>专业 / DISCIPLINE：仪表 / INSTRUMENT</p>
+    </div>
+    <table class="spec-meta-table">
+      <tr>
+        <th>项目号<br>PROJECT NO.</th><td>${specCell(specVal("specProjectNo"))}</td>
+        <th>图号<br>FILE NO.</th><td>${specCell(specVal("specFileNo"))}</td>
+        <th>版次<br>REV.</th><td>${specCell(specVal("specRev"))}</td>
+      </tr>
+      <tr>
+        <th>项目名称<br>PROJECT</th><td colspan="2">${specCell(specVal("specProjectName"))}</td>
+        <th>装置<br>PLANT / UNIT</th><td colspan="2">${specCell(specVal("specPlantName"))}</td>
+      </tr>
+      <tr>
+        <th>设计阶段<br>DESIGN STAGE</th><td colspan="5">${specCell(specVal("specDesignStage"))}</td>
+      </tr>
+    </table>
+    <table class="spec-table">
+      <colgroup>
+        <col style="width:27mm" />
+        <col style="width:7mm" />
+        <col style="width:43mm" />
+        <col />
+      </colgroup>
+      ${groups.join("")}
+    </table>
+    <div class="spec-notes-box"><strong>Notes:</strong><br>${escapeHtml(specVal("specNotes", ""))}</div>
+    <div class="spec-footer-box">
+      <div>仪表规格书<br>INSTRUMENT SPECIFICATION</div>
+      <div>${footerName}</div>
+      <div>V1.6-E-fix 生成预览，正式归档前需校审</div>
+    </div>
+    <div class="spec-muted">本预览按上传压力/差压/科里奥利/电磁流量计模板主要栏目生成，版式为网页打印优化版。</div>
+  `;
+
+  previewWrap.classList.remove("hidden");
+}
+
+function printSpecPreview() {
+  handleSpecGenerate();
+  window.print();
+}
+
+const specGenerateBtn = getEl("specGenerateBtn");
+const specSampleBtn = getEl("specSampleBtn");
+const specResetBtn = getEl("specResetBtn");
+const specPrintBtn = getEl("specPrintBtn");
+const specSeparatorMode = getEl("specSeparatorMode");
+const specType = getEl("specType");
+
+if (specGenerateBtn) specGenerateBtn.addEventListener("click", handleSpecGenerate);
+if (specSampleBtn) specSampleBtn.addEventListener("click", loadSpecSample);
+if (specResetBtn) specResetBtn.addEventListener("click", resetSpecDefaults);
+if (specPrintBtn) specPrintBtn.addEventListener("click", printSpecPreview);
+if (specSeparatorMode) specSeparatorMode.addEventListener("change", updateSpecVisibility);
+if (specType) specType.addEventListener("change", () => {
+  resetSpecDefaults();
+  updateSpecVisibility();
+  handleSpecGenerate();
+});
+
+specFieldIds.forEach((id) => {
+  const el = getEl(id);
+  if (!el) return;
+  el.addEventListener("input", handleSpecGenerate);
+  el.addEventListener("change", () => {
+    updateSpecVisibility();
+    handleSpecGenerate();
+  });
+});
+
+window.handleSpecGenerate = handleSpecGenerate;
+updateSpecVisibility();

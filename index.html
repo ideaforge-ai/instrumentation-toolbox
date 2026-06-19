@@ -18,7 +18,7 @@
     <button class="tool-btn" data-module="ptCompensation">温压补偿</button>
     <button class="tool-btn" data-module="orificeCalc">孔板计算</button>
     <button class="tool-btn" data-module="valveSizing">阀门选型</button>
-    <button class="tool-btn disabled" disabled>规格书生成</button>
+    <button class="tool-btn" data-module="specGenerator">规格书生成</button>
   </nav>
 
   <main class="app-main">
@@ -361,36 +361,856 @@
           </div>
         </div>
 
-        <div class="advanced-box">
-          <div class="advanced-title">参考阀库匹配</div>
-          <div class="valve-grid">
-            <label>参考阀库
-              <select id="valveCatalogMode">
-                <option value="on">启用通用参考阀库</option>
-                <option value="off">关闭，仅计算 Cv / Kv</option>
-              </select>
-            </label>
-            <label>口径过滤
-              <select id="valveCatalogDnFilter">
-                <option value="all">全部口径</option>
-              </select>
-            </label>
-          </div>
-          <p class="note">参考阀库为通用工程参考数据，用于把所需 Cv 映射到候选阀型、DN 和额定 Cv 范围；正式选型仍应以厂家最新样本为准。</p>
-        </div>
-
         <button id="valveCalcBtn" class="primary-btn" type="button">计算</button>
         <div id="valveResult" class="result-box">结果将在这里显示</div>
-        <p class="note">注：V1.5.1 为调节阀 Cv / Kv 工程初选版，新增通用参考阀库匹配。液体按常用 Kv 公式估算；气体按工况密度、膨胀系数和临界压差比进行工程估算。结果适合现场快速校核，不替代厂家正式选型计算书。</p>
+        <p class="note">注：V1.5 为调节阀 Cv / Kv 工程初选版。液体按常用 Kv 公式估算；气体按工况密度、膨胀系数和临界压差比进行工程估算。结果适合现场快速校核，不替代厂家正式选型计算书。</p>
+      </div>
+    </section>
+
+
+    <!-- 规格书生成 -->
+    <section id="specGenerator" class="tool-section">
+      <h2>规格书生成</h2>
+      <div class="card wide-card">
+        <label>规格书类型
+          <select id="specType">
+            <option value="pressure">压力变送器规格书</option>
+            <option value="differential">差压变送器规格书</option>
+            <option value="coriolis">科里奥利质量流量计规格书</option>
+            <option value="magnetic">电磁流量计规格书</option>
+            <option disabled>孔板流量计规格书（后续开放）</option>
+            <option value="controlValve">调节阀规格书</option>
+          </select>
+        </label>
+
+        <div class="advanced-box">
+          <div class="advanced-title">项目与文件信息</div>
+          <div class="spec-grid three-col">
+            <label>项目号 PROJECT NO.
+              <input id="specProjectNo" type="text" placeholder="例如 1332102" />
+            </label>
+            <label>图号 FILE NO.
+              <input id="specFileNo" type="text" placeholder="例如 1332102-0000-IA306-5004" />
+            </label>
+            <label>版次 REV.
+              <input id="specRev" type="text" value="C00" />
+            </label>
+          </div>
+          <div class="spec-grid">
+            <label>项目名称 PROJECT
+              <input id="specProjectName" type="text" placeholder="请输入项目名称" />
+            </label>
+            <label>车间/装置 PLANT / UNIT
+              <input id="specPlantName" type="text" placeholder="请输入装置名称" />
+            </label>
+            <label>设计阶段 DESIGN STAGE
+              <input id="specDesignStage" type="text" value="详细设计" />
+            </label>
+          </div>
+        </div>
+
+        <div class="advanced-box">
+          <div class="advanced-title">基本信息</div>
+          <div class="spec-grid three-col">
+            <label>位号 Tag Number
+              <input id="specTag" type="text" placeholder="例如 PT-00206A" />
+            </label>
+            <label>P&ID No.
+              <input id="specPid" type="text" placeholder="例如 0020A" />
+            </label>
+            <label>功能 Function
+              <input id="specFunction" type="text" value="Pressure Transmitter Gauge" />
+            </label>
+          </div>
+          <label>服务说明 Service
+            <input id="specService" type="text" placeholder="例如 N2 import from battery limit ..." />
+          </label>
+          <div class="spec-grid">
+            <label>危险区域 Classification
+              <input id="specHazardClass" type="text" value="Zone 2, Gr. IIC, T6" />
+            </label>
+            <label>防爆/认证 Execution / Certification
+              <input id="specHazardCert" type="text" value="EEx-i / ATEX" />
+            </label>
+          </div>
+        </div>
+
+        <div class="advanced-box">
+          <div class="advanced-title">工况与设计条件</div>
+          <div class="spec-grid three-col">
+            <label>介质 Fluid
+              <input id="specFluid" type="text" placeholder="例如 Nitrogen" />
+            </label>
+            <label>介质状态 Fluid State
+              <select id="specFluidState">
+                <option value="Gas">Gas</option>
+                <option value="Liquid">Liquid</option>
+                <option value="Steam">Steam</option>
+                <option value="Mixed">Mixed</option>
+              </select>
+            </label>
+            <label>安装方式 Mounting
+              <input id="specMounting" type="text" value="Bracket For On Equipment Tag / 2” Pipe Mounting" />
+            </label>
+          </div>
+          <div class="spec-grid three-col">
+            <label>操作压力 Min，MPag
+              <input id="specPMin" type="text" placeholder="例如 0.2" />
+            </label>
+            <label>操作压力 Normal，MPag
+              <input id="specPNormal" type="text" placeholder="例如 0.25" />
+            </label>
+            <label>操作压力 Max，MPag
+              <input id="specPMax" type="text" placeholder="例如 0.3" />
+            </label>
+          </div>
+          <div class="spec-grid three-col">
+            <label>操作温度 Min，℃
+              <input id="specTMin" type="text" placeholder="例如 -14" />
+            </label>
+            <label>操作温度 Normal，℃
+              <input id="specTNormal" type="text" placeholder="例如 30" />
+            </label>
+            <label>操作温度 Max，℃
+              <input id="specTMax" type="text" placeholder="例如 43" />
+            </label>
+          </div>
+          <div class="spec-grid">
+            <label>设计压力，MPag
+              <input id="specDesignPressure" type="text" placeholder="例如 0.45" />
+            </label>
+            <label>设计温度 Min / Max，℃
+              <input id="specDesignTemp" type="text" placeholder="例如 -14 / 90" />
+            </label>
+            <label>操作密度 kg/m³
+              <input id="specDensity" type="text" placeholder="可选" />
+            </label>
+            <label>操作黏度 mPa·s
+              <input id="specViscosity" type="text" placeholder="可选" />
+            </label>
+          </div>
+        </div>
+
+        <div id="specDpBox" class="advanced-box hidden">
+          <div class="advanced-title">差压变送器专用参数</div>
+          <div class="spec-grid">
+            <label>差压用途 / Flow Rate Range
+              <input id="specDpFlowRange" type="text" placeholder="例如 F-0301 filter pressure difference" />
+            </label>
+            <label>最大差压 Diff. Pressure(max)
+              <input id="specDpMax" type="text" placeholder="例如 0.05 MPa" />
+            </label>
+            <label>静压 Static Pressure
+              <input id="specStaticPressure" type="text" placeholder="可选，例如 0.37 MPag" />
+            </label>
+            <label>HP/LP 侧过程连接尺寸
+              <input id="specHpLpSize" type="text" value="1/2&quot; NPT (F)" />
+            </label>
+            <label>HP/LP 侧压力等级
+              <input id="specHpLpRating" type="text" placeholder="可选" />
+            </label>
+            <label>HP/LP 侧密封面
+              <input id="specHpLpFacing" type="text" placeholder="可选" />
+            </label>
+            <label>冲洗接口 Flushing Connection
+              <input id="specFlushingConnection" type="text" placeholder="可选" />
+            </label>
+            <label>阀组 Manifold
+              <input id="specDpManifold" type="text" value="3 Valve Manifold" />
+            </label>
+          </div>
+        </div>
+
+        <div id="specCoriolisBox" class="hidden">
+          <div class="advanced-box">
+            <div class="advanced-title">科里奥利流量计：管线与流量条件</div>
+            <div class="spec-grid three-col">
+              <label>管线号 Line Number
+                <input id="specLineNumber" type="text" placeholder="例如 3&quot;-VAC-00002-7CS4-TD" />
+              </label>
+              <label>管线尺寸 Line Size
+                <input id="specLineSize" type="text" placeholder="例如 3&quot;" />
+              </label>
+              <label>管线等级 Line Rating
+                <input id="specLineRating" type="text" placeholder="例如 150#" />
+              </label>
+            </div>
+            <div class="spec-grid">
+              <label>管线等级/材料 Line Class
+                <input id="specLineClass" type="text" placeholder="例如 7CS4" />
+              </label>
+              <label>管线材质 Line Material
+                <input id="specLineMaterial" type="text" placeholder="例如 SS 316/316L DUAL GRADE" />
+              </label>
+              <label>发泡 Foaming
+                <input id="specFoaming" type="text" placeholder="可选" />
+              </label>
+              <label>夹带液体/固体 Entrained Liquid / Solid
+                <input id="specEntrainedSolid" type="text" placeholder="可选，例如 YES / -" />
+              </label>
+              <label>腐蚀/磨蚀 Corrosive / Abrasive
+                <input id="specCorrosiveAbrasive" type="text" placeholder="可选" />
+              </label>
+              <label>结垢倾向 Build-Up Tendency
+                <input id="specBuildUp" type="text" placeholder="可选" />
+              </label>
+              <label>脉动流 Pulsating Flow
+                <input id="specPulsatingFlow" type="text" placeholder="可选" />
+              </label>
+              <label>传感器振动 Vibration at Sensor Location
+                <input id="specVibration" type="text" placeholder="可选" />
+              </label>
+            </div>
+            <div class="spec-grid three-col">
+              <label>质量流量 Min，kg/h
+                <input id="specFlowMin" type="text" placeholder="例如 500" />
+              </label>
+              <label>质量流量 Normal，kg/h
+                <input id="specFlowNormal" type="text" placeholder="例如 5000" />
+              </label>
+              <label>质量流量 Max，kg/h
+                <input id="specFlowMax" type="text" placeholder="例如 12000" />
+              </label>
+            </div>
+            <div class="spec-grid">
+              <label>流量范围 Flow Rate Range
+                <input id="specFlowRange" type="text" placeholder="例如 0 to 14500 kg/h" />
+              </label>
+              <label>允许压降 Max Allowable Pressure Drop
+                <input id="specMaxPressureDrop" type="text" placeholder="例如 0.025 MPa" />
+              </label>
+              <label>分子量 Molecular Mass
+                <input id="specMolecularMass" type="text" placeholder="气体可填，例如 28" />
+              </label>
+              <label>比重 Specific Gravity
+                <input id="specSpecificGravity" type="text" placeholder="可选" />
+              </label>
+            </div>
+          </div>
+
+          <div class="advanced-box">
+            <div class="advanced-title">科里奥利流量计：测量管 Meter Tube</div>
+            <div class="spec-grid three-col">
+              <label>测量管型式 Type
+                <input id="specMeterTubeType" type="text" value="Double Tube" />
+              </label>
+              <label>计算压降 Calculated Press. Drop
+                <input id="specCalculatedPressureDrop" type="text" placeholder="例如 4.1 KPa" />
+              </label>
+              <label>流向 Flow Direction
+                <input id="specFlowDirection" type="text" value="Uni-Directional" />
+              </label>
+            </div>
+            <div class="spec-grid three-col">
+              <label>连接形式 Connection Type
+                <input id="specMeterConnType" type="text" value="Flanged" />
+              </label>
+              <label>粗糙度 Roughness
+                <input id="specMeterRoughness" type="text" value="125 - 250 AARH" />
+              </label>
+              <label>仪表口径 Size
+                <input id="specMeterSize" type="text" placeholder="例如 1 1/2&quot;" />
+              </label>
+              <label>压力等级 Rating
+                <input id="specMeterRating" type="text" placeholder="例如 300#" />
+              </label>
+              <label>密封面 Facing
+                <input id="specMeterFacing" type="text" value="RF" />
+              </label>
+              <label>衬里/涂层 Lining / Coating
+                <input id="specLiningCoating" type="text" placeholder="可选" />
+              </label>
+            </div>
+            <div class="spec-grid">
+              <label>测量管材质 Material: Meter Tube
+                <input id="specMeterTubeMaterial" type="text" value="316LSS" />
+              </label>
+              <label>法兰材质 Material: Flanges
+                <input id="specFlangeMaterial" type="text" value="F316/F316L" />
+              </label>
+              <label>传感器型号 Meter Tube Model
+                <input id="specMeterTubeModel" type="text" placeholder="例如 CMFS150M342N2BZMKZZTG" />
+              </label>
+              <label>测量管防爆 Execution
+                <input id="specMeterHazardExecution" type="text" value="EEx-i" />
+              </label>
+            </div>
+          </div>
+
+          <div class="advanced-box">
+            <div class="advanced-title">科里奥利流量计：变送器与选项</div>
+            <div class="spec-grid three-col">
+              <label>安装方式 Mounting
+                <input id="specCoriolisMounting" type="text" value="分体式安装" />
+              </label>
+              <label>距测量管距离 Distance from Meter Tube
+                <input id="specDistanceFromMeter" type="text" placeholder="可选" />
+              </label>
+              <label>变送器电源 Power Supply
+                <input id="specCoriolisPower" type="text" value="220 VAC, 50Hz U.P.S" />
+              </label>
+            </div>
+            <div class="spec-grid three-col">
+              <label>最大负载 Max Load
+                <input id="specMaxLoad" type="text" value="MFR.STD" />
+              </label>
+              <label>零点稳定性 Zero Stability
+                <input id="specZeroStability" type="text" value="MFR.STD" />
+              </label>
+              <label>变送器精度 Accuracy
+                <input id="specCoriolisAccuracy" type="text" value="± 0.1 %" />
+              </label>
+            </div>
+            <div class="spec-grid">
+              <label>变送器防爆 Execution
+                <input id="specTxHazardExecution" type="text" value="EEx-i (Signal) & EEx-d (Power Supply)" />
+              </label>
+              <label>变送器壳体 Housing Material
+                <input id="specTxHousingMaterial" type="text" value="Die Cast Aluminium" />
+              </label>
+              <label>变送器型号 Transmitter Model
+                <input id="specTxModel" type="text" value="1700R15ABFMZZZPK" />
+              </label>
+              <label>变送器支架 Transmitter Holder
+                <input id="specTransmitterHolder" type="text" value="YES" />
+              </label>
+              <label>互联电缆 Interconnection Cable / Length
+                <input id="specInterconnectionCable" type="text" value="YES / MFR.STD" />
+              </label>
+              <label>组态器 Transmitter Configurator
+                <input id="specTransmitterConfigurator" type="text" value="Not Required" />
+              </label>
+              <label>诊断 Diagnostic
+                <input id="specDiagnostic" type="text" value="Required" />
+              </label>
+            </div>
+          </div>
+        </div>
+
+
+
+        <div id="specMagneticBox" class="hidden">
+          <div class="advanced-box">
+            <div class="advanced-title">电磁流量计：管线与工况条件</div>
+            <div class="spec-grid three-col">
+              <label>管线号 Line Number
+                <input id="specMagLineNumber" type="text" placeholder="例如 4&quot;-FRD-115003-4CC2" />
+              </label>
+              <label>管线尺寸 Line Size
+                <input id="specMagLineSize" type="text" placeholder="例如 4&quot;" />
+              </label>
+              <label>管线等级 Line Rating
+                <input id="specMagLineRating" type="text" placeholder="例如 150#" />
+              </label>
+            </div>
+            <div class="spec-grid">
+              <label>管线等级/材料 Line Class
+                <input id="specMagLineClass" type="text" placeholder="例如 4CC2" />
+              </label>
+              <label>管线材质 Line Material
+                <input id="specMagLineMaterial" type="text" placeholder="例如 CARBON STEEL" />
+              </label>
+              <label>发泡 Foaming
+                <input id="specMagFoaming" type="text" placeholder="可选" />
+              </label>
+              <label>夹带液体/固体 Entrained Liquid / Solid
+                <input id="specMagEntrainedSolid" type="text" placeholder="可选" />
+              </label>
+              <label>腐蚀/磨蚀 Corrosive / Abrasive
+                <input id="specMagCorrosiveAbrasive" type="text" placeholder="可选" />
+              </label>
+              <label>结垢倾向 Build-Up Tendency
+                <input id="specMagBuildUp" type="text" placeholder="可选" />
+              </label>
+              <label>脉动流 Pulsating Flow
+                <input id="specMagPulsatingFlow" type="text" placeholder="可选" />
+              </label>
+              <label>传感器振动 Vibration at Sensor Location
+                <input id="specMagVibration" type="text" placeholder="可选" />
+              </label>
+            </div>
+            <div class="spec-grid three-col">
+              <label>体积流量 Min，m³/h
+                <input id="specMagFlowMin" type="text" placeholder="例如 0" />
+              </label>
+              <label>体积流量 Normal，m³/h
+                <input id="specMagFlowNormal" type="text" placeholder="例如 30" />
+              </label>
+              <label>体积流量 Max，m³/h
+                <input id="specMagFlowMax" type="text" placeholder="可选" />
+              </label>
+            </div>
+            <div class="spec-grid">
+              <label>流量范围 Flow Rate Range
+                <input id="specMagFlowRange" type="text" placeholder="例如 0 to 36 m³/h" />
+              </label>
+              <label>允许压降 Max Allowable Pressure Drop
+                <input id="specMagMaxPressureDrop" type="text" placeholder="例如 0.05 MPa" />
+              </label>
+              <label>比重 Specific Gravity
+                <input id="specMagSpecificGravity" type="text" placeholder="可选" />
+              </label>
+              <label>分子量 Molecular Mass
+                <input id="specMagMolecularMass" type="text" placeholder="可选" />
+              </label>
+            </div>
+          </div>
+
+          <div class="advanced-box">
+            <div class="advanced-title">电磁流量计：传感器 Transducer</div>
+            <div class="spec-grid three-col">
+              <label>传感器型式 Type
+                <input id="specMagTransducerType" type="text" value="Pipe type" />
+              </label>
+              <label>仪表量程 Instrument Range
+                <input id="specMagInstrumentRange" type="text" placeholder="例如 0 - 36 m³/h" />
+              </label>
+              <label>精度 Accuracy
+                <input id="specMagInstrumentAccuracy" type="text" value="+/-0.3%" />
+              </label>
+            </div>
+            <div class="spec-grid three-col">
+              <label>过程连接 Size / Rating / Facing
+                <input id="specMagProcessConnection" type="text" placeholder="例如 4&quot; ANSI 150LB RF" />
+              </label>
+              <label>法兰材质 Flange Material
+                <input id="specMagFlangeMaterial" type="text" value="SS 316" />
+              </label>
+              <label>本体材质 Body Material
+                <input id="specMagBodyMaterial" type="text" value="SS 316" />
+              </label>
+            </div>
+            <div class="spec-grid">
+              <label>衬里材质 Lining Material
+                <input id="specMagLiningMaterial" type="text" value="PTFE" />
+              </label>
+              <label>电极型式 Electrode Type
+                <input id="specMagElectrodeType" type="text" placeholder="可选" />
+              </label>
+              <label>电极材质 Electrode Material
+                <input id="specMagElectrodeMaterial" type="text" value="SS 316L" />
+              </label>
+              <label>接地环 / 材质 Grounding Ring / Material
+                <input id="specMagGroundingRing" type="text" value="YES / SS 316L" />
+              </label>
+              <label>专用电缆长度 Special Cable Length
+                <input id="specMagSpecialCableLength" type="text" placeholder="一体式可留空" />
+              </label>
+              <label>专用电缆入口 Special Cable Entry
+                <input id="specMagSpecialCableEntry" type="text" placeholder="可选" />
+              </label>
+            </div>
+          </div>
+
+          <div class="advanced-box">
+            <div class="advanced-title">电磁流量计：变送器与选项</div>
+            <div class="spec-grid three-col">
+              <label>安装方式 Mounting
+                <input id="specMagMounting" type="text" value="Integral" />
+              </label>
+              <label>测量范围 Measuring Range
+                <input id="specMagMeasuringRange" type="text" placeholder="例如 0 - 36 m³/h" />
+              </label>
+              <label>测量精度 Accuracy
+                <input id="specMagMeasuringAccuracy" type="text" value="+/-0.3%" />
+              </label>
+            </div>
+            <div class="spec-grid">
+              <label>电缆入口 Cable Entry
+                <input id="specMagCableEntry" type="text" value="1/2&quot; NPT(F), 2 Nos. min." />
+              </label>
+              <label>供电 Power Supply
+                <input id="specMagPowerSupply" type="text" value="24VDC" />
+              </label>
+              <label>电源电缆入口 Power Cable Entry
+                <input id="specMagPowerCableEntry" type="text" placeholder="可选" />
+              </label>
+              <label>壳体材质 Housing Material
+                <input id="specMagHousingMaterial" type="text" value="Die Cast Aluminium" />
+              </label>
+              <label>就地指示 Integral Indicator
+                <input id="specMagIntegralIndicator" type="text" value="YES" />
+              </label>
+              <label>累积单位 Totalizer Unit
+                <input id="specMagTotalizerUnit" type="text" placeholder="可选" />
+              </label>
+              <label>安装支架 Mounting Bracket
+                <input id="specMagMountingBracket" type="text" placeholder="可选" />
+              </label>
+              <label>支架材质 Bracket Material
+                <input id="specMagBracketMaterial" type="text" placeholder="可选" />
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div id="specTransmitterParamsBox" class="advanced-box">
+          <div class="advanced-title">变送器参数</div>
+          <div class="spec-grid three-col">
+            <label>类型/系统 Type / System
+              <input id="specTxType" type="text" value="Smart / 2 Wire" />
+            </label>
+            <label>输出信号 Output Signal
+              <input id="specOutput" type="text" value="4 - 20 mA" />
+            </label>
+            <label>数字协议 Protocol
+              <input id="specProtocol" type="text" value="HART" />
+            </label>
+          </div>
+          <div class="spec-grid three-col">
+            <label>电源 Supply
+              <input id="specSupply" type="text" value="24 VDC" />
+            </label>
+            <label>精度 Accuracy
+              <input id="specAccuracy" type="text" value="± 0.065% Span" />
+            </label>
+            <label>防护等级 Protection
+              <input id="specProtection" type="text" value="IP 65" />
+            </label>
+          </div>
+          <div class="spec-grid three-col">
+            <label>仪表量程 Instr. Range
+              <input id="specInstrRange" type="text" placeholder="例如 0 to 0.5 MPag" />
+            </label>
+            <label>校验量程 Calib. Range
+              <input id="specCalibRange" type="text" placeholder="例如 0 to 0.5 MPag" />
+            </label>
+            <label>DCS 量程 DCS Range
+              <input id="specDcsRange" type="text" placeholder="例如 0 to 0.5 MPag" />
+            </label>
+          </div>
+          <label>阻尼时间 Damp. Time
+            <input id="specDamping" type="text" value="Set" />
+          </label>
+        </div>
+
+        <div id="specTransmitterConnectionBox" class="advanced-box">
+          <div class="advanced-title">过程连接与隔膜密封</div>
+          <div class="spec-grid three-col">
+            <label>连接类型 Type
+              <select id="specProcessConnType">
+                <option value="Threaded">Threaded</option>
+                <option value="Flanged">Flanged</option>
+                <option value="Diaphragm seal type">Diaphragm seal type</option>
+              </select>
+            </label>
+            <label>连接尺寸 Size
+              <input id="specProcessConnSize" type="text" value="1/2&quot; NPT (F)" />
+            </label>
+            <label>压力等级 Rating
+              <input id="specProcessConnRating" type="text" placeholder="例如 150 #" />
+            </label>
+          </div>
+          <div class="spec-grid">
+            <label>密封面 Facing
+              <input id="specProcessConnFacing" type="text" placeholder="例如 RF" />
+            </label>
+            <label>粗糙度 Roughness
+              <input id="specProcessConnRoughness" type="text" placeholder="例如 125 - 250 AARH" />
+            </label>
+            <label>隔膜/远传方式
+              <select id="specSeparatorMode">
+                <option value="none">无隔膜密封</option>
+                <option value="direct">直接隔膜密封</option>
+                <option value="capillary">远传隔膜 + 毛细管</option>
+              </select>
+            </label>
+            <label>隔膜类型 Separator Type
+              <input id="specSeparatorType" type="text" value="Diaphragm seal type" />
+            </label>
+          </div>
+          <div id="specSeparatorBox" class="advanced-box hidden">
+            <div class="advanced-title">隔膜密封附加参数</div>
+            <div class="spec-grid">
+              <label>Remote Diaphragm with Capillary
+                <input id="specRemoteCapillary" type="text" value="Yes" />
+              </label>
+              <label>Capillary Length
+                <input id="specCapillaryLength" type="text" placeholder="例如 3 m" />
+              </label>
+              <label>Armour
+                <input id="specCapillaryArmour" type="text" value="Required" />
+              </label>
+              <label>Filling Fluid
+                <input id="specFillingFluid" type="text" value="Silicon oil" />
+              </label>
+              <label>Flushing Ring
+                <input id="specFlushingRing" type="text" placeholder="例如 1/2&quot; NPT(F)×2" />
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div id="specTransmitterMaterialBox" class="advanced-box">
+          <div class="advanced-title">电气、材质、选项与采购</div>
+          <div class="spec-grid">
+            <label>电气接口 Electrical Connection
+              <input id="specElectricalConn" type="text" value="1/2&quot; NPT(F), 2 Nos. min." />
+            </label>
+            <label>接地 Grounding
+              <input id="specGrounding" type="text" value="Internal and External" />
+            </label>
+            <label>接液材质 Wetted Material
+              <input id="specWettedMaterial" type="text" value="SS316L" />
+            </label>
+            <label>电子壳体 Electronic Housing
+              <input id="specHousing" type="text" value="Die-Cast Aluminium" />
+            </label>
+            <label>支架/U型螺栓 Bracket & U Bolts
+              <input id="specBracketMaterial" type="text" value="SS" />
+            </label>
+            <label>涂装 Paint
+              <input id="specPaint" type="text" value="Manufacturer Std." />
+            </label>
+            <label>就地表头 Integrated Output Meter
+              <input id="specLocalMeter" type="text" value="Required" />
+            </label>
+            <label>阀组 Manifold
+              <input id="specManifold" type="text" placeholder="例如 2-Valve Manifold" />
+            </label>
+            <label>伴热/夹套 Tracing / Jacketing
+              <input id="specTracing" type="text" placeholder="可选" />
+            </label>
+            <label>NAMUR NE43
+              <input id="specNe43" type="text" value="Yes" />
+            </label>
+            <label>厂家 Manufacturer
+              <input id="specManufacturer" type="text" placeholder="例如 EMERSON" />
+            </label>
+            <label>型号 Model
+              <input id="specModel" type="text" placeholder="请输入型号" />
+            </label>
+            <label>供应商 Supplier
+              <input id="specSupplier" type="text" placeholder="可选" />
+            </label>
+          </div>
+        </div>
+
+        <div id="specControlValveBox" class="hidden">
+          <div class="advanced-box">
+            <div class="advanced-title">调节阀：管线与设计条件</div>
+            <div class="spec-grid three-col">
+              <label>允许噪声 Allowable Sound Pressure Level
+                <input id="specCvAllowNoise" type="text" value="&lt;85 dBA @ 1 m" />
+              </label>
+              <label>气源压力 Min / Norm / Max
+                <input id="specCvAirSupply" type="text" value="0.6 / 0.7 / 0.8 MPag" />
+              </label>
+              <label>气源设计压力 Design
+                <input id="specCvAirDesign" type="text" value="0.8 MPag" />
+              </label>
+            </div>
+            <div class="spec-grid">
+              <label>入口管线 Line Size and Schedule: Inlet
+                <input id="specCvLineInlet" type="text" placeholder="例如 1 1/2&quot;-PR-12009-1DL4 (TB)" />
+              </label>
+              <label>出口管线 Line Size and Schedule: Outlet
+                <input id="specCvLineOutlet" type="text" placeholder="可选" />
+              </label>
+              <label>管线等级 Line Class
+                <input id="specCvLineClass" type="text" placeholder="例如 1DL4" />
+              </label>
+              <label>管道材质 Pipe Material
+                <input id="specCvPipeMaterial" type="text" placeholder="例如 LT CARBON STEEL" />
+              </label>
+              <label>设计压力 Pressure Min / Max
+                <input id="specCvDesignPressure" type="text" placeholder="例如 4 / 4 MPag" />
+              </label>
+              <label>设计温度 Temperature Min / Max
+                <input id="specCvDesignTemp" type="text" placeholder="例如 -45 / 200 ℃" />
+              </label>
+            </div>
+          </div>
+
+          <div class="advanced-box">
+            <div class="advanced-title">调节阀：过程条件与计算数据</div>
+            <div class="spec-grid">
+              <label>入口密度 Min / Norm / Max
+                <input id="specCvDensity" type="text" placeholder="例如 - / 80.6 / 80.6" />
+              </label>
+              <label>比重 Min / Norm / Max
+                <input id="specCvSpecificGravity" type="text" placeholder="例如 - / - / -" />
+              </label>
+              <label>入口蒸汽压 Inlet Vapour Pressure
+                <input id="specCvVaporPressure" type="text" placeholder="例如 - / - / -" />
+              </label>
+              <label>比热比 Specific Heat Ratio
+                <input id="specCvHeatRatio" type="text" placeholder="例如 1.90" />
+              </label>
+              <label>分子量 Molecular Mass
+                <input id="specCvMolecularMass" type="text" placeholder="例如 44" />
+              </label>
+              <label>入口黏度 Inlet Viscosity
+                <input id="specCvViscosity" type="text" placeholder="例如 - / 0.012 / 0.012" />
+              </label>
+              <label>流量 Flow Rate
+                <input id="specCvFlow" type="text" placeholder="例如 - / 60 / 500 kg/h" />
+              </label>
+              <label>入口压力 Inlet Pressure
+                <input id="specCvInletPressure" type="text" placeholder="例如 - / 3 / 3 MPag" />
+              </label>
+              <label>压降 Pressure Drop
+                <input id="specCvPressureDrop" type="text" placeholder="例如 - / 0.1 / 0.07 MPa" />
+              </label>
+              <label>入口温度 Inlet Temperature
+                <input id="specCvInletTemperature" type="text" placeholder="例如 - / 85 / 85 ℃" />
+              </label>
+              <label>最大关断压差 Max Shut-off DP
+                <input id="specCvShutoffDp" type="text" placeholder="例如 4.1 MPa" />
+              </label>
+              <label>泄漏等级 Leakage Class
+                <input id="specCvLeakageClass" type="text" value="ANSI IV" />
+              </label>
+              <label>故障位 Power / Air Failure Position
+                <input id="specCvFailurePosition" type="text" value="Power: Close / Air: Close" />
+              </label>
+              <label>流量系数 Cv
+                <input id="specCvFlowCoefficient" type="text" placeholder="例如 - / 0.3283 / 3.28" />
+              </label>
+              <label>噪声 Sound Pressure Level
+                <input id="specCvSoundPressure" type="text" placeholder="例如 - / - / - dBA" />
+              </label>
+              <label>开度 Travel %
+                <input id="specCvTravel" type="text" placeholder="例如 - / 31 / 94 %" />
+              </label>
+            </div>
+          </div>
+
+          <div class="advanced-box">
+            <div class="advanced-title">调节阀：阀体、内件与材质</div>
+            <div class="spec-grid">
+              <label>阀型 Type
+                <input id="specCvValveType" type="text" value="Globe" />
+              </label>
+              <label>额定 Cv / 可调比 Cv / Rangeability
+                <input id="specCvRatedCvRangeability" type="text" placeholder="例如 4.0 / 4" />
+              </label>
+              <label>连接形式 End Connection Type
+                <input id="specCvEndConnection" type="text" value="Flanged" />
+              </label>
+              <label>粗糙度 Roughness
+                <input id="specCvRoughness" type="text" value="125 - 250 AARH" />
+              </label>
+              <label>阀体尺寸 Size
+                <input id="specCvBodySize" type="text" placeholder="例如 1&quot;" />
+              </label>
+              <label>压力等级 / 密封面 Rating / Facing
+                <input id="specCvBodyRatingFacing" type="text" placeholder="例如 300# / RF" />
+              </label>
+              <label>流向 Flow Action To
+                <input id="specCvFlowAction" type="text" value="To Open" />
+              </label>
+              <label>上阀盖 Bonnet Type / Lubricat.
+                <input id="specCvBonnet" type="text" placeholder="例如 EXT-1 (-45 to -17 degC)" />
+              </label>
+              <label>内件 Port / Plug / Character
+                <input id="specCvTrim" type="text" placeholder="例如 Single / Character / Equal %" />
+              </label>
+              <label>密封 Sealing Seat / Plug
+                <input id="specCvSealing" type="text" value="Metallic" />
+              </label>
+              <label>阀体/阀盖 Body / Bonnet
+                <input id="specCvMatBodyBonnet" type="text" placeholder="例如 A351CF8" />
+              </label>
+              <label>阀芯/阀座 Plug / Seat
+                <input id="specCvMatPlugSeat" type="text" placeholder="例如 SUS316 STELLITE / SUS316" />
+              </label>
+              <label>阀杆/导向 Stem / Plug Guides
+                <input id="specCvMatStemGuides" type="text" placeholder="例如 SUS316 / SUS316" />
+              </label>
+              <label>填料 Packing
+                <input id="specCvPacking" type="text" placeholder="例如 Grafoil" />
+              </label>
+              <label>支架/外壳 Yoke / Housing
+                <input id="specCvYokeHousing" type="text" placeholder="例如 Ductile Iron" />
+              </label>
+              <label>波纹管 Bellows
+                <input id="specCvBellows" type="text" placeholder="可选" />
+              </label>
+            </div>
+          </div>
+
+          <div class="advanced-box">
+            <div class="advanced-title">调节阀：执行机构与附件</div>
+            <div class="spec-grid">
+              <label>执行机构 Type / Model
+                <input id="specCvActuator" type="text" placeholder="例如 Diaphragm / PSA1R" />
+              </label>
+              <label>动作 / 手轮位置 Action / Handwheel Loc.
+                <input id="specCvActuatorAction" type="text" placeholder="例如 - / Direct" />
+              </label>
+              <label>尺寸 / 弹簧范围 Size / Spring Range
+                <input id="specCvActuatorSizeSpring" type="text" placeholder="可选" />
+              </label>
+              <label>定位器 Type / Model
+                <input id="specCvPositioner" type="text" value="Smart E/P / SRI986-BIDS6EAANA" />
+              </label>
+              <label>定位器信号 / 作用 Input Signal Range / Action
+                <input id="specCvPositionerSignalAction" type="text" value="4~20 mA (HART) / Direct" />
+              </label>
+              <label>气源接口 Pneumatic Connection
+                <input id="specCvPneumaticConnection" type="text" value="SS 316 / 1/4&quot; NPT(F)" />
+              </label>
+              <label>防护 / 电气接口 Protection / Electrical Connection
+                <input id="specCvPositionerProtection" type="text" value="IP 65 / 1/2&quot; NPT(F), 2 Nos. min." />
+              </label>
+              <label>过滤减压阀 Air Set
+                <input id="specCvAirSet" type="text" value="Yes / SS304 / KZ03-2B-XX" />
+              </label>
+              <label>限位开关 Limit Switch
+                <input id="specCvLimitSwitch" type="text" placeholder="可选" />
+              </label>
+              <label>电磁阀 Solenoid Valve
+                <input id="specCvSolenoid" type="text" placeholder="可选" />
+              </label>
+              <label>伴热/夹套 Tracing / Jacketing
+                <input id="specCvTracing" type="text" placeholder="例如 Required" />
+              </label>
+              <label>增速器 / 保位阀 Booster / Air Lock
+                <input id="specCvBoosterAirLock" type="text" placeholder="可选" />
+              </label>
+              <label>厂家 Manufacturer
+                <input id="specCvManufacturer" type="text" placeholder="例如 AZBIL" />
+              </label>
+              <label>型号 Model
+                <input id="specCvModel" type="text" placeholder="例如 AGVM-ACNP" />
+              </label>
+              <label>供应商 Supplier
+                <input id="specCvSupplier" type="text" placeholder="可选" />
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div id="specNotesBox" class="advanced-box">
+          <div class="advanced-title">备注 Notes</div>
+          <label>备注 Notes
+            <textarea id="specNotes" rows="4" placeholder="请输入备注"></textarea>
+          </label>
+        </div>
+
+        <div class="button-row">
+          <button id="specGenerateBtn" class="primary-btn" type="button">生成预览</button>
+          <button id="specSampleBtn" class="secondary-btn" type="button">填入示例</button>
+          <button id="specResetBtn" class="secondary-btn" type="button">清空/默认</button>
+          <button id="specPrintBtn" class="secondary-btn" type="button">打印 / 另存 PDF</button>
+        </div>
+        <p class="note">注：V1.6-E-fix2 支持压力变送器、差压变送器、科里奥利质量流量计、电磁流量计与调节阀规格书生成。先生成预览，再使用浏览器打印功能另存为 PDF；正式归档前仍需校审。</p>
+      </div>
+
+      <div id="specPreviewWrap" class="card wide-card spec-preview-card hidden">
+        <div class="spec-preview-title">规格书预览</div>
+        <div id="specPreview" class="spec-sheet"></div>
       </div>
     </section>
 
   </main>
 
   <footer class="app-footer">
-    <span>V1.5.1 · Instrumentation Toolbox</span>
+    <span>V1.6-E-fix2 · Instrumentation Toolbox</span>
   </footer>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=20260619-v16e-fix2"></script>
+
 </body>
 </html>

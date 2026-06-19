@@ -60,3 +60,187 @@ input[readonly], input:disabled, select:disabled { background:#eef3f6; color:#60
   .orifice-grid,
   .valve-grid { grid-template-columns:1fr; }
 }
+
+/* 规格书生成 */
+.wide-card { max-width: 980px; }
+.spec-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+.spec-grid.three-col { grid-template-columns:repeat(3,1fr); }
+textarea { width:100%; margin-top:7px; padding:12px; font-size:16px; border:1px solid #b9c6cf; border-radius:10px; background:white; color:#102a43; font-family:Arial,"Microsoft YaHei",sans-serif; resize:vertical; }
+textarea:focus { outline:none; border-color:#0f4c5c; box-shadow:0 0 0 3px rgba(15,76,92,0.12); }
+.button-row { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:10px; align-items:center; }
+.secondary-btn { width:100%; padding:13px; border:1px solid #0f4c5c; border-radius:12px; background:white; color:#0f4c5c; font-size:16px; font-weight:800; cursor:pointer; }
+.secondary-btn:hover { background:#eef7f9; }
+.spec-preview-card { margin-top:18px; }
+.spec-preview-title { font-size:20px; font-weight:900; color:#0f4c5c; margin-bottom:12px; }
+.spec-sheet { background:white; color:#000; overflow-x:auto; font-family:Arial,"Microsoft YaHei",sans-serif; }
+.spec-title-box { border:2px solid #000; padding:10px; text-align:center; margin-bottom:8px; }
+.spec-title-box h3 { margin:4px 0; font-size:24px; letter-spacing:3px; }
+.spec-title-box p { margin:2px 0; font-size:13px; }
+.spec-meta-table, .spec-table { width:100%; border-collapse:collapse; table-layout:fixed; font-size:12px; background:white; }
+.spec-meta-table th, .spec-meta-table td, .spec-table th, .spec-table td { border:1px solid #000; padding:5px 6px; vertical-align:middle; word-break:break-word; }
+.spec-table th.section-head { width:112px; background:#f0f0f0; text-align:left; font-weight:900; }
+.spec-table .row-no { width:32px; text-align:center; color:#333; }
+.spec-table .field-name { width:190px; font-weight:700; }
+.spec-table .value-cell { font-weight:600; }
+.spec-notes-box { border:1px solid #000; border-top:none; min-height:80px; padding:8px; font-size:12px; white-space:pre-wrap; }
+.spec-footer-box { display:grid; grid-template-columns:1fr 1fr 1fr; border:1px solid #000; border-top:none; font-size:12px; }
+.spec-footer-box div { padding:6px; border-right:1px solid #000; }
+.spec-footer-box div:last-child { border-right:none; }
+.spec-muted { color:#60717d; font-size:12px; margin-top:6px; }
+
+@media (max-width:640px) {
+  .spec-grid, .spec-grid.three-col { grid-template-columns:1fr; }
+  .button-row { grid-template-columns:1fr; }
+  .spec-title-box h3 { font-size:18px; }
+  .spec-meta-table, .spec-table { font-size:11px; min-width:760px; }
+}
+
+@media print {
+  @page { size: A4 portrait; margin: 7mm 6mm; }
+
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html, body { width: 100%; margin: 0 !important; padding: 0 !important; background: white !important; color: #000 !important; }
+
+  .app-header,
+  .tool-nav,
+  .app-footer,
+  #specGenerator > h2,
+  #specGenerator > .card:not(.spec-preview-card),
+  .tool-section:not(#specGenerator),
+  .spec-preview-title,
+  .spec-muted { display: none !important; }
+
+  .app-main { padding: 0 !important; margin: 0 !important; min-height: 0 !important; }
+  #specGenerator, #specPreviewWrap { display: block !important; animation: none !important; }
+  #specPreviewWrap {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    background: white !important;
+  }
+
+  .spec-sheet {
+    width: 100% !important;
+    overflow: visible !important;
+    font-family: Arial, "Microsoft YaHei", sans-serif !important;
+    color: #000 !important;
+  }
+
+  .spec-title-box {
+    border: 1.6px solid #000 !important;
+    padding: 3.2mm 2mm !important;
+    margin: 0 0 2mm 0 !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .spec-title-box h3 {
+    margin: 0 0 1mm 0 !important;
+    font-size: 17pt !important;
+    line-height: 1.05 !important;
+    letter-spacing: 2px !important;
+  }
+  .spec-title-box p {
+    margin: 0.5mm 0 !important;
+    font-size: 8.3pt !important;
+    line-height: 1.08 !important;
+  }
+
+  .spec-meta-table, .spec-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+    font-size: 7.4pt !important;
+    line-height: 1.08 !important;
+    background: white !important;
+  }
+  .spec-meta-table th,
+  .spec-meta-table td,
+  .spec-table th,
+  .spec-table td {
+    border: 0.8px solid #000 !important;
+    padding: 1.05mm 1.15mm !important;
+    vertical-align: middle !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    hyphens: none !important;
+  }
+  .spec-meta-table th {
+    font-size: 7.2pt !important;
+    line-height: 1.05 !important;
+    font-weight: 900 !important;
+  }
+  .spec-meta-table td { font-weight: 600 !important; }
+
+  .spec-table th.section-head {
+    width: 27mm !important;
+    min-width: 27mm !important;
+    max-width: 27mm !important;
+    background: #fff !important;
+    text-align: left !important;
+    font-size: 7.2pt !important;
+    line-height: 1.05 !important;
+    font-weight: 900 !important;
+    white-space: normal !important;
+  }
+  .spec-table .row-no {
+    width: 7mm !important;
+    min-width: 7mm !important;
+    max-width: 7mm !important;
+    text-align: center !important;
+    color: #222 !important;
+    font-weight: 500 !important;
+  }
+  .spec-table .field-name {
+    width: 43mm !important;
+    min-width: 43mm !important;
+    max-width: 43mm !important;
+    font-weight: 800 !important;
+  }
+  .spec-table .value-cell {
+    font-weight: 700 !important;
+  }
+
+  .spec-table tr {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .spec-notes-box {
+    border: 0.8px solid #000 !important;
+    border-top: none !important;
+    min-height: 12mm !important;
+    padding: 1.5mm !important;
+    font-size: 7.2pt !important;
+    line-height: 1.08 !important;
+    white-space: pre-wrap !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .spec-footer-box {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr 1fr !important;
+    border: 0.8px solid #000 !important;
+    border-top: none !important;
+    font-size: 7.2pt !important;
+    line-height: 1.08 !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .spec-footer-box div {
+    padding: 1.5mm !important;
+    border-right: 0.8px solid #000 !important;
+  }
+  .spec-footer-box div:last-child { border-right: none !important; }
+}
+
+/* 调节阀规格书：字段较多，打印时略微压缩 */
+.control-valve-spec-table .field-name { font-size: 11.5px; }
+@media print {
+  .control-valve-spec-table { font-size: 6.8pt !important; line-height: 1.02 !important; }
+  .control-valve-spec-table th,
+  .control-valve-spec-table td { padding: 0.78mm 0.9mm !important; }
+  .control-valve-spec-table .field-name { font-size: 6.75pt !important; }
+  .control-valve-spec-table th.section-head { font-size: 6.8pt !important; }
+}
